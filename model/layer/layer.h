@@ -1,4 +1,4 @@
-/* layer.h 
+/* model/layer/layer.h 
  *
  * This file defines the interface for the layer object in the CNN model.
  * The layer object contains the necessary information to perform the forward

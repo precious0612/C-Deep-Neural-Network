@@ -1,4 +1,10 @@
-/* input.h */
+/* input/input.h 
+ *
+ * This file provides functions to load input data from images and resize it
+ * to a specified size. It also provides a union structure to store the input
+ * data in a format that can be processed by the neural network.
+ * 
+ */
 
 #ifndef INPUT_H
 #define INPUT_H

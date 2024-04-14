@@ -1,4 +1,4 @@
-/* input.c */
+/* input/input.c */
 
 #include <stdio.h>
 #include <stdlib.h>

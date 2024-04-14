@@ -6,7 +6,7 @@ To complete the second part, "Input Data Representation," you'll need to define 
      - Data storage: Use a suitable data structure to store pixel values (e.g., 1D array, 2D array, or tensor).
      - Data type: Specify the data type for pixel values (e.g., uint8, float32).
 
-2. **Data Preprocessing Functions**:
+2. **Data Preprocessing Functions** (Optional):
    - Define functions to preprocess input images before feeding them into the CNN model. Preprocessing steps may include:
      - Normalization: Scaling pixel values to a specific range (e.g., [0, 1] or [-1, 1]).
      - Resizing: Adjusting image dimensions to match the input shape expected by the CNN model.
@@ -22,7 +22,7 @@ To complete the second part, "Input Data Representation," you'll need to define 
 
 5. **Integration with Model Input**:
    - Ensure compatibility between the input data representation and the input layer of the CNN model.
-     - Convert input data into the appropriate format expected by the model (e.g., tensor).
+     - Convert input data into the appropriate format expected by the model (e.g., array).
 
 6. **Error Handling**:
    - Implement error handling mechanisms to deal with potential issues during data loading and preprocessing.

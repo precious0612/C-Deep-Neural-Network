@@ -1,4 +1,10 @@
-/* model.h */
+/* model/model.h 
+ * 
+ * This file it defines the interface for the model object in the CNN. 
+ * The model object contains the necessary methods to perform 
+ * the forward pass, backward pass, and update the parameters for the entire model.
+ *
+ */
 
 #ifndef MODEL_H
 #define MODEL_H
