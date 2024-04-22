@@ -1,8 +1,8 @@
 # Compiler and flags
 CC = clang
-CFLAGS = -Wall -Wextra -Werror -I/opt/hombrew/jpeg-turbo/3.0.2/include -I/opt/hombrew/libpng/1.6.43/include
-LDFLAGS = -L/opt/hombrew/jpeg-turbo/3.0.2/lib -L/opt/hombrew/libpng/1.6.43/lib
-LDLIBS = -lturbojpeg -lpng
+CFLAGS = -Wall -Wextra -Werror -I/usr/local/include/stb -I/opt/homebrew/Cellar/json-c/0.17/include -I/opt/homebrew/Cellar/json-c/0.17/include/json-c -I/opt/homebrew/Cellar/jpeg-turbo/3.0.2/include -I/opt/homebrew/opt/libpng/include/libpng16
+LDFLAGS = -L/opt/homebrew/Cellar/json-c/0.17/lib -L/opt/homebrew/Cellar/jpeg-turbo/3.0.2/lib -L/opt/homebrew/opt/libpng/lib
+LDLIBS = -ljson-c -lturbojpeg -lpng16
 
 # Directories
 SRC_DIR = .

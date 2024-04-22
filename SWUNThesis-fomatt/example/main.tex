@@ -1,0 +1,46 @@
+\documentclass[a4paper,twoside]{ctexrep} % 使用 CTEX 模板
+\usepackage{template/swunthesis-new}           
+% \usepackage{ctex}
+\usepackage{fancyhdr}
+\usepackage{float} %强制固定图片位置
+\usepackage{enumitem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\include{content/info}
+\makecover
+
+% 摘要
+\include{content/abstract}
+
+%按照毕业论文格式，重新设置页码（建议不要删除）
+\cfoot{\thepage} % 页码居中显示
+\setcounter{page}{1}
+\pagestyle{fancy}
+
+% 正文示例，按下方样式引入新的章节
+\include{content/introduction}
+
+%结论
+\include{content/conclusion}
+
+
+% 附录
+\include{content/appendix_new} % 阅读使用说明许可后，正式使用模板时移除此行代码。
+\include{content/appendix}
+
+% 参考文献
+\bibliographystyle{template/bstutf8}
+\clearpage
+\phantomsection
+\songti
+\linespread{1.0}   
+\centering
+\addcontentsline{toc}{chapter}{参考文献} % 向目录中添加参考文献条目
+
+\bibliography{references/main}
+
+% 致谢
+\include{content/acknowledgement}
+
+\end{document}

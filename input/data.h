@@ -1,4 +1,4 @@
-/* input/input.h 
+/* input/data.h 
  *
  * This file provides functions to load input data from images and resize it
  * to a specified size. It also provides a union structure to store the input
@@ -6,19 +6,15 @@
  * 
  */
 
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef DATA_H
+#define DATA_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
-// Define the Input and DataType structures
+#include "../utils/utils.h"
 
-typedef struct {
-    int width;
-    int height;
-    int channels;
-} Dimensions;
+// Define the Input and DataType structures
 
 // Define the data types supported by the library
 typedef enum {
@@ -77,4 +73,4 @@ void resize_image(InputData **image_data_ptr, const Dimensions original_dimensio
 // Free the memory associated with an image
 void free_image_data(InputData *image_data, Dimensions dimensions, DataType data_type);
 
-#endif /* Input_H */
+#endif /* Data_H */

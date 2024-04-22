@@ -9,7 +9,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "../input/dataset.h"
+#include "../dataset.h"
 #include "layer/layer.h"
 
 // Define structure for holding model configuration

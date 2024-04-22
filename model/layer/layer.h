@@ -10,6 +10,8 @@
 #ifndef LAYER_H
 #define LAYER_H
 
+#include "../../utils/utils.h"
+
 // Define enumeration for layer types
 typedef enum {
     CONVOLUTIONAL,
@@ -41,13 +43,41 @@ typedef union {
     } dropout_params;
 } LayerParams;
 
+typedef union {
+    float**** conv_weights;     // Weights for convolutional layers
+    float*** pool_weights;      // Weights for pooling layers (not typically used)
+    float** fc_weights;         // Weights for fully connected layers
+    float* dropout_weights;     // Weights for dropout layers (not typically used)
+} Weights;
+
 // Define structure for representing a layer in the CNN model
 typedef struct Layer {
     LayerType type;           // Type of the layer
     LayerParams params;       // Parameters specific to the layer type
-    float** weights;          // Weights for the layer
+    Weights weights;          // Weights for the layer
     float* biases;            // Biases for the layer
+    Dimensions input_shape;   // Shape of the input data
+    Dimensions output_shape;  // Shape of the output data
     struct Layer* next_layer; // Pointer to the next layer in the model
+    struct Layer* prev_layer; // Pointer to the previous layer in the model
 } Layer;
+
+// Define function to create a new layer
+Layer* create_layer(LayerType type, LayerParams params);
+
+// Define function to initialize the weights and biases for a layer
+void initialize_layer(Layer* layer);
+
+// Define function to forward pass through a layer
+void layer_forward_pass(Layer* layer, float*** input, float*** output);
+
+// Define function to backward pass through a layer
+void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, float*** input_grad, float learning_rate);
+
+// Define function to compute the output shape
+void compute_output_shape(Layer* layer);
+
+// Define function to delete a layer
+void delete_layer(Layer* layer);
 
 #endif /* LAYER_H */

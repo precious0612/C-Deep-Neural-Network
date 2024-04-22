@@ -1,0 +1,41 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/precious/Design_Neural_Network/model/layer/output/example'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _create_layer, symObjAddr: 0x0, symBinAddr: 0x100003860, symSize: 0xA4 }
+  - { offsetInCU: 0x41, offset: 0x41, size: 0x8, addend: 0x0, symName: _rand_uniform, symObjAddr: 0x7E4, symBinAddr: 0x100004044, symSize: 0x8C }
+  - { offsetInCU: 0x66, offset: 0x66, size: 0x8, addend: 0x0, symName: _rand_uniform.seeded, symObjAddr: 0xA024, symBinAddr: 0x10000C000, symSize: 0x0 }
+  - { offsetInCU: 0xEA, offset: 0xEA, size: 0x8, addend: 0x0, symName: _create_layer, symObjAddr: 0x0, symBinAddr: 0x100003860, symSize: 0xA4 }
+  - { offsetInCU: 0x12F, offset: 0x12F, size: 0x8, addend: 0x0, symName: _initialize_layer, symObjAddr: 0xA4, symBinAddr: 0x100003904, symSize: 0x354 }
+  - { offsetInCU: 0x279, offset: 0x279, size: 0x8, addend: 0x0, symName: _malloc_4d_float_array, symObjAddr: 0x3F8, symBinAddr: 0x100003C58, symSize: 0x3EC }
+  - { offsetInCU: 0x3D5, offset: 0x3D5, size: 0x8, addend: 0x0, symName: _malloc_2d_float_array, symObjAddr: 0x870, symBinAddr: 0x1000040D0, symSize: 0x118 }
+  - { offsetInCU: 0x457, offset: 0x457, size: 0x8, addend: 0x0, symName: _layer_forward_pass, symObjAddr: 0x988, symBinAddr: 0x1000041E8, symSize: 0x25C }
+  - { offsetInCU: 0x497, offset: 0x497, size: 0x8, addend: 0x0, symName: _conv_forward, symObjAddr: 0xBF4, symBinAddr: 0x100004454, symSize: 0x308 }
+  - { offsetInCU: 0x62C, offset: 0x62C, size: 0x8, addend: 0x0, symName: _pool_forward, symObjAddr: 0xEFC, symBinAddr: 0x10000475C, symSize: 0x310 }
+  - { offsetInCU: 0x778, offset: 0x778, size: 0x8, addend: 0x0, symName: _fc_forward, symObjAddr: 0x120C, symBinAddr: 0x100004A6C, symSize: 0x1A8 }
+  - { offsetInCU: 0x863, offset: 0x863, size: 0x8, addend: 0x0, symName: _dropout_forward, symObjAddr: 0x13B4, symBinAddr: 0x100004C14, symSize: 0x194 }
+  - { offsetInCU: 0x913, offset: 0x913, size: 0x8, addend: 0x0, symName: _layer_backward_pass, symObjAddr: 0x1548, symBinAddr: 0x100004DA8, symSize: 0x2FC }
+  - { offsetInCU: 0x972, offset: 0x972, size: 0x8, addend: 0x0, symName: _conv_backward, symObjAddr: 0x1854, symBinAddr: 0x1000050B4, symSize: 0x73C }
+  - { offsetInCU: 0xC94, offset: 0xC94, size: 0x8, addend: 0x0, symName: _pool_backward, symObjAddr: 0x1F90, symBinAddr: 0x1000057F0, symSize: 0x420 }
+  - { offsetInCU: 0xE71, offset: 0xE71, size: 0x8, addend: 0x0, symName: _fc_backward, symObjAddr: 0x23B0, symBinAddr: 0x100005C10, symSize: 0x470 }
+  - { offsetInCU: 0x105E, offset: 0x105E, size: 0x8, addend: 0x0, symName: _dropout_backward, symObjAddr: 0x2820, symBinAddr: 0x100006080, symSize: 0x1B4 }
+  - { offsetInCU: 0x111C, offset: 0x111C, size: 0x8, addend: 0x0, symName: _compute_output_shape, symObjAddr: 0x29D4, symBinAddr: 0x100006234, symSize: 0x228 }
+  - { offsetInCU: 0x1258, offset: 0x1258, size: 0x8, addend: 0x0, symName: _delete_layer, symObjAddr: 0x2C0C, symBinAddr: 0x10000646C, symSize: 0xE0 }
+  - { offsetInCU: 0x127C, offset: 0x127C, size: 0x8, addend: 0x0, symName: _free_4d_float_array, symObjAddr: 0x2CFC, symBinAddr: 0x10000655C, symSize: 0x1AC }
+  - { offsetInCU: 0x132C, offset: 0x132C, size: 0x8, addend: 0x0, symName: _free_2d_float_array, symObjAddr: 0x2EA8, symBinAddr: 0x100006708, symSize: 0xA8 }
+  - { offsetInCU: 0x137E, offset: 0x137E, size: 0x8, addend: 0x0, symName: _malloc_4d_int_array, symObjAddr: 0x2F50, symBinAddr: 0x1000067B0, symSize: 0x3EC }
+  - { offsetInCU: 0x14DA, offset: 0x14DA, size: 0x8, addend: 0x0, symName: _free_4d_int_array, symObjAddr: 0x333C, symBinAddr: 0x100006B9C, symSize: 0x1AC }
+  - { offsetInCU: 0x158A, offset: 0x158A, size: 0x8, addend: 0x0, symName: _malloc_3d_int_array, symObjAddr: 0x34E8, symBinAddr: 0x100006D48, symSize: 0x1F4 }
+  - { offsetInCU: 0x164C, offset: 0x164C, size: 0x8, addend: 0x0, symName: _malloc_3d_float_array, symObjAddr: 0x36DC, symBinAddr: 0x100006F3C, symSize: 0x1F4 }
+  - { offsetInCU: 0x170E, offset: 0x170E, size: 0x8, addend: 0x0, symName: _free_3d_int_array, symObjAddr: 0x38D0, symBinAddr: 0x100007130, symSize: 0x120 }
+  - { offsetInCU: 0x1786, offset: 0x1786, size: 0x8, addend: 0x0, symName: _free_3d_float_array, symObjAddr: 0x39F0, symBinAddr: 0x100007250, symSize: 0x120 }
+  - { offsetInCU: 0x17FE, offset: 0x17FE, size: 0x8, addend: 0x0, symName: _malloc_2d_int_array, symObjAddr: 0x3B10, symBinAddr: 0x100007370, symSize: 0x118 }
+  - { offsetInCU: 0x1880, offset: 0x1880, size: 0x8, addend: 0x0, symName: _free_2d_int_array, symObjAddr: 0x3C28, symBinAddr: 0x100007488, symSize: 0xA8 }
+  - { offsetInCU: 0x18D2, offset: 0x18D2, size: 0x8, addend: 0x0, symName: _malloc_1d_int_array, symObjAddr: 0x3CD0, symBinAddr: 0x100007530, symSize: 0x58 }
+  - { offsetInCU: 0x190B, offset: 0x190B, size: 0x8, addend: 0x0, symName: _malloc_1d_float_array, symObjAddr: 0x3D28, symBinAddr: 0x100007588, symSize: 0x58 }
+  - { offsetInCU: 0x1944, offset: 0x1944, size: 0x8, addend: 0x0, symName: _free_1d_int_array, symObjAddr: 0x3D80, symBinAddr: 0x1000075E0, symSize: 0x40 }
+  - { offsetInCU: 0x196A, offset: 0x196A, size: 0x8, addend: 0x0, symName: _free_1d_float_array, symObjAddr: 0x3DC0, symBinAddr: 0x100007620, symSize: 0x40 }
+  - { offsetInCU: 0x1990, offset: 0x1990, size: 0x8, addend: 0x0, symName: _flatten_input, symObjAddr: 0x3E00, symBinAddr: 0x100007660, symSize: 0x140 }
+  - { offsetInCU: 0x1A32, offset: 0x1A32, size: 0x8, addend: 0x0, symName: _rand_int, symObjAddr: 0x3F40, symBinAddr: 0x1000077A0, symSize: 0x3C }
+  - { offsetInCU: 0x1A68, offset: 0x1A68, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x3F7C, symBinAddr: 0x1000077DC, symSize: 0x600 }
+...

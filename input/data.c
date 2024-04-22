@@ -9,20 +9,20 @@
 #include <png.h> // libpng
 // stb_image for other formats
 #define STB_IMAGE_IMPLEMENTATION
-#include "../stb/stb_image.h"
+#include <stb_image.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "../stb/stb_image_write.h"
+#include <stb_image_write.h>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "stb/stb_image_resize.h"
+#include <stb_image_resize.h>
 
-#include "input.h"
+#include "data.h"
 
 InputData *load_input_data_from_image(const char *filename, const Dimensions *input_dimensions, DataType data_type) {
     // Determine image format based on filename extension
     const char *ext = strrchr(filename, '.');
     ImageFormat format;
     if (ext == NULL) {
-        // Unable to determine format, default to JPEG
+        // Unable to determine format, default to JPEG2
         format = PIC;
     } else {
         ext++; // Skip the dot
@@ -773,30 +773,3 @@ void free_image_data(InputData *image_data, Dimensions dimensions, DataType data
     free(image_data);
 }
 
-// int main() {
-//     // Load the test image
-//     const char *filename = "/Users/precious/Design_Neural_Network/input/test_pic/test.jpeg";
-//     Dimensions new_dimensions;
-//     new_dimensions.width = 100;
-//     new_dimensions.height = 100;
-//     new_dimensions.channels = 3;
-//     InputData *image_data = load_input_data_from_image(filename, &new_dimensions, Int);
-//     if (image_data == NULL) {
-//         fprintf(stderr, "Error: Failed to load the image.\n");
-//         return 1;
-//     }
-
-//     // print the first two line
-//     for (int i = 66; i < 70; i++) {
-//         for (int j = 88; j < 91; j++) {
-//             printf("%d ", image_data->int_data[i][j][0]);
-//         }
-//         printf("\n");
-//     }
-
-//     // Free the memory allocated for image data
-//     free_image_data(image_data, new_dimensions, Int);
-
-//     printf("Image processing completed successfully.\n");
-//     return 0;
-// }

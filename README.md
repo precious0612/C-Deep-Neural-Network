@@ -70,7 +70,7 @@ For detailed usage instructions and function documentation, please refer to:
 - [dataset.c](dataset.c): 
   Provides implementations for functions to load datasets from JSON files, create JSON files from datasets, split datasets into batches, and free memory allocated for datasets.
 
-- [input/input.h](input/input.h): 
+- [input/data.h](input/data.h): 
   Defines structures and functions for handling input data, including images, for `dataset.h`.
   - Defines a `Dimensions` structure to represent the width, height, and number of channels of input data.
   - Defines a `DataType` enum to specify the data type of input data.

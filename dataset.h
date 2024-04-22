@@ -9,7 +9,7 @@
 #ifndef DATASET_H
 #define DATASET_H
 
-#include "input/input.h"
+#include "input/data.h"
 
 // Structure to describe dataset
 typedef struct Dataset {

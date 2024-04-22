@@ -1,0 +1,14 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/precious/Design_Neural_Network/output/CNN'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _compute_output_shape, symObjAddr: 0x0, symBinAddr: 0x100002AE4, symSize: 0x228 }
+  - { offsetInCU: 0x297, offset: 0x297, size: 0x8, addend: 0x0, symName: _compute_output_shape, symObjAddr: 0x0, symBinAddr: 0x100002AE4, symSize: 0x228 }
+  - { offsetInCU: 0x3D3, offset: 0x3D3, size: 0x8, addend: 0x0, symName: _create_model, symObjAddr: 0x238, symBinAddr: 0x100002D1C, symSize: 0x1BC }
+  - { offsetInCU: 0x44F, offset: 0x44F, size: 0x8, addend: 0x0, symName: _add_layer, symObjAddr: 0x3F4, symBinAddr: 0x100002ED8, symSize: 0x12C }
+  - { offsetInCU: 0x4AC, offset: 0x4AC, size: 0x8, addend: 0x0, symName: _compile_model, symObjAddr: 0x520, symBinAddr: 0x100003004, symSize: 0x1BC }
+  - { offsetInCU: 0x4ED, offset: 0x4ED, size: 0x8, addend: 0x0, symName: _check_output_shape, symObjAddr: 0x6DC, symBinAddr: 0x1000031C0, symSize: 0xC0 }
+  - { offsetInCU: 0x523, offset: 0x523, size: 0x8, addend: 0x0, symName: _print_model_info, symObjAddr: 0x79C, symBinAddr: 0x100003280, symSize: 0x4CC }
+  - { offsetInCU: 0x563, offset: 0x563, size: 0x8, addend: 0x0, symName: _free_model, symObjAddr: 0xC78, symBinAddr: 0x10000375C, symSize: 0x9C }
+  - { offsetInCU: 0x5B1, offset: 0x5B1, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0xD14, symBinAddr: 0x1000037F8, symSize: 0x2F0 }
+...

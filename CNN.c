@@ -5,7 +5,8 @@
 #include <string.h>
 
 #include "CNN.h"
-#include "model/layer/layer.h"  // Include layer.h to access calculate_output_shape
+#include "model/layer/layer.h"
+#include "model/layer/layer.c"  // Include layer.h to access calculate_output_shape
 
 // Function to create a new CNN model
 Model* create_model(int input_width, int input_height, int input_channels,
@@ -51,17 +52,7 @@ void add_layer(Model* model, LayerType type, LayerParams params) {
         return;
     }
 
-    // Allocate memory for the new layer
-    Layer* new_layer = (Layer*)malloc(sizeof(Layer));
-    if (new_layer == NULL) {
-        fprintf(stderr, "Error: Memory allocation failed for layer.\n");
-        return;
-    }
-
-    // Initialize the layer's fields
-    new_layer->type = type;
-    new_layer->params = params;
-    new_layer->next_layer = NULL;
+    Layer* new_layer = create_layer(type, params);
 
     // If this is the first layer being added
     if (model->layers == NULL) {
@@ -77,6 +68,7 @@ void add_layer(Model* model, LayerType type, LayerParams params) {
 
     // Append the new layer to the end of the model
     current_layer->next_layer = new_layer;
+    newer_layer->prev_layer = current_layer;
 }
 
 void compile_model(Model* model, ModelConfig config) {
@@ -91,6 +83,22 @@ void compile_model(Model* model, ModelConfig config) {
     model->learning_rate = config.learning_rate;
     strcpy(model->loss_function, config.loss_function);
     strcpy(model->metric_name, config.metric_name);
+
+    // Set the input shape of the first layer
+    model->layers->input_shape.width = model->input.width;
+    model->layers->input_shape.height = model->input.height;
+    model->layers->input_shape.channels = model->input.channels;
+
+    // Compute the output shapes for each layer
+    Layer* current_layer = model->layers;
+    while (current_layer != NULL) {
+        initialize_layer(current_layer);
+        compute_output_shape(current_layer);
+        if (current_layer->next_layer != NULL) {
+            current_layer->next_layer->input_shape = current_layer->output_shape;
+        }
+        current_layer = current_layer->next_layer;
+    }
 
     // Check if the final layer output shape matches the output information
     if (check_output_shape(model)) {
@@ -115,7 +123,6 @@ void print_model_info(Model* model) {
     printf("Evaluation Metric: %s\n", model->metric_name);
     
     // Iterate through layers and print their types and parameters
-    Dimensions layer_input = model->input;
     Layer* current_layer = model->layers;
     int layer_num = 1;
     while (current_layer != NULL) {
@@ -123,37 +130,32 @@ void print_model_info(Model* model) {
         switch (current_layer->type) {
             case CONVOLUTIONAL:
                 printf("Convolutional\n");
-                printf("  Input Shape: (%d, %d, %d)\n", layer_input.width, layer_input.height, layer_input.channels);
+                printf("  Input Shape: (%d, %d, %d)\n", current_layer->input_shape.width, current_layer->input_shape.height, current_layer->input_shape.channels);
                 printf("  Number of Filters: %d\n", current_layer->params.conv_params.num_filters);
                 printf("  Filter Size: %d\n", current_layer->params.conv_params.filter_size);
                 printf("  Stride: %d\n", current_layer->params.conv_params.stride);
                 printf("  Padding: %d\n", current_layer->params.conv_params.padding);
+                printf("  Output Shape: (%d, %d, %d)\n", current_layer->output_shape.width, current_layer->output_shape.height, current_layer->output_shape.channels);
                 printf("  Activation Function: %s\n", current_layer->params.conv_params.activation);
-                layer_input.width = (layer_input.width - current_layer->params.conv_params.filter_size + 2 * current_layer->params.conv_params.padding) / current_layer->params.conv_params.stride + 1;
-                layer_input.height = (layer_input.height - current_layer->params.conv_params.filter_size + 2 * current_layer->params.conv_params.padding) / current_layer-> params.conv_params.stride + 1;
-                layer_input.channels = current_layer->params.conv_params.num_filters;
                 break;
             case POOLING:
                 printf("Pooling\n");
-                printf("  Input Shape: (%d, %d, %d)\n", layer_input.width, layer_input.height, layer_input.channels);
+                printf("  Input Shape: (%d, %d, %d)\n", current_layer->input_shape.width, current_layer->input_shape.height, current_layer->input_shape.channels);
                 printf("  Pool Size: %d\n", current_layer->params.pooling_params.pool_size);
                 printf("  Stride: %d\n", current_layer->params.pooling_params.stride);
                 printf("  Pool Type: %s\n", current_layer->params.pooling_params.pool_type);
-                layer_input.width = (layer_input.width - current_layer->params.pooling_params.pool_size) / current_layer->params.pooling_params.stride + 1;
-                layer_input.height = (layer_input.height - current_layer->params.pooling_params.pool_size) / current_layer->params.pooling_params.stride + 1;
+                printf("  Output Shape: (%d, %d, %d)\n", current_layer->output_shape.width, current_layer->output_shape.height, current_layer->output_shape.channels);
                 break;
             case FULLY_CONNECTED:
                 printf("Fully Connected\n");
-                printf("  Input Shape: (%d, %d, %d)\n", layer_input.width, layer_input.height, layer_input.channels);
+                printf("  Input Shape: (%d, %d, %d)\n", current_layer->input_shape.width, current_layer->input_shape.height, current_layer->input_shape.channels);
                 printf("  Number of Neurons: %d\n", current_layer->params.fc_params.num_neurons);
                 printf("  Activation Function: %s\n", current_layer->params.fc_params.activation);
-                layer_input.width = 1;
-                layer_input.height = 1;
-                layer_input.channels = current_layer->params.fc_params.num_neurons;
+                printf("  Output Shape: (%d, %d, %d)\n", current_layer->output_shape.width, current_layer->output_shape.height, current_layer->output_shape.channels);
                 break;
             case DROPOUT:
                 printf("Dropout\n");
-                printf("  Input Shape: (%d, %d, %d)\n", layer_input.width, layer_input.height, layer_input.channels);
+                printf("  Input Shape: (%d, %d, %d)\n", current_layer->input_shape.width, current_layer->input_shape.height, current_layer->input_shape.channels);
                 printf("  Dropout Rate: %.2f\n", current_layer->params.dropout_params.dropout_rate);
             // Add cases for other layer types as needed
         }
@@ -164,49 +166,17 @@ void print_model_info(Model* model) {
 
 // Function to check if the final layer output shape matches the output information
 int check_output_shape(Model *model) {
-    // Initialize output shape with input shape from model config
-    int output_shape[3];
-    output_shape[0] = model->input.width;
-    output_shape[1] = model->input.height;
-    output_shape[2] = model->input.channels;
 
     // Iterate through the layers of the model to calculate the output shape
     Layer *current_layer = model->layers;
     do {
-        // Based on the layer type, calculate the output shape
-        switch (current_layer->type) {
-            case CONVOLUTIONAL:
-                // Calculate output shape for convolutional layer
-                // Output shape = [(input_shape - filter_size + 2 * padding) / stride] + 1
-                output_shape[0] = (output_shape[0] - current_layer->params.conv_params.filter_size + 2 * current_layer->params.conv_params.padding) / current_layer->params.conv_params.stride + 1;
-                output_shape[1] = (output_shape[1] - current_layer->params.conv_params.filter_size + 2 * current_layer->params.conv_params.padding) / current_layer->params.conv_params.stride + 1;
-                output_shape[2] = current_layer->params.conv_params.num_filters;
-                break;
-            case POOLING:
-                // Calculate output shape for pooling layer
-                // Output shape = [(input_shape - pool_size) / stride] + 1
-                output_shape[0] = (output_shape[0] - current_layer->params.pooling_params.pool_size) / current_layer->params.pooling_params.stride + 1;
-                output_shape[1] = (output_shape[1] - current_layer->params.pooling_params.pool_size) / current_layer->params.pooling_params.stride + 1;
-                output_shape[2] = output_shape[2];
-                break;
-            case FULLY_CONNECTED:
-                // Calculate output shape for fully connected layer
-                output_shape[0] = 1;
-                output_shape[1] = 1;
-                output_shape[2] = current_layer->params.fc_params.num_neurons;
-                break;
-            default:
-                // Unsupported layer type
-                fprintf(stderr, "Error: Unsupported layer type.\n");
-                break;
-        }
         current_layer = current_layer->next_layer;
-    } while (current_layer != NULL);
+    } while (current_layer->next_layer != NULL);
 
     // Compare final output shape with output information
-    if (output_shape[0] == model->output.width &&
-        output_shape[1] == model->output.height &&
-        output_shape[2] == model->output.channels) {
+    if (current_layer->output_shape.width == model->output.width &&
+        current_layer->output_shape.height == model->output.height &&
+        current_layer->output_shape.channels == model->output.channels) {
         return 1; // Output shape matches
     } else {
         return 0; // Output shape does not match
