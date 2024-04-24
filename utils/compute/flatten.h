@@ -5,6 +5,7 @@
 
 #include "../dimension.h"
 
-void flatten_input(float*** input, float* flattened, Dimensions input_shape);
+void flatten(float*** input, float* flattened, Dimensions input_shape);
+void unflatten(float* flattened, float*** output, Dimensions output_shape);
 
 #endif // /* FLATTEN_ */

@@ -741,6 +741,10 @@ void resize_image(InputData **image_data_ptr, const Dimensions original_dimensio
     *image_data_ptr = resized_image;
 }
 
+// Preprocess input data (e.g., normalization, resizing)
+void preprocess_input(InputData* input_data, Dimensions input_shape) {
+    // Assuming input_data is already loaded and preprocessed
+}
 
 void free_image_data(InputData *image_data, Dimensions dimensions, DataType data_type) {
     if (image_data == NULL) {
