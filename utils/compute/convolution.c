@@ -1,5 +1,6 @@
 /* utils/compute/convolution.c */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -7,7 +8,9 @@
 #include "../optim.h"
 #include "../memory.h"
 
-void conv_forward(float*** input, float*** output, Dimensions input_shape, Dimensions output_shape, int num_filters, int filter_size, int stride, int padding, float**** weights, float* biases) {
+float*** conv_forward(float*** input, Dimensions input_shape, Dimensions output_shape, int num_filters, int filter_size, int stride, int padding, float**** weights, float* biases) {
+    // Allocate memory for the output
+    float*** output = malloc_3d_float_array(output_shape.height, output_shape.width, num_filters);
 
     // Iterate over output elements
     for (int out_ch = 0; out_ch < num_filters; out_ch++) {
@@ -30,9 +33,11 @@ void conv_forward(float*** input, float*** output, Dimensions input_shape, Dimen
             }
         }
     }
+
+    return output;
 }
 
-void conv_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape, Dimensions output_shape, int num_filters, int filter_size, int stride, int padding, float**** weights, float* biases, float**** weight_grads, float* bias_grads) {
+void conv_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape, Dimensions output_shape, int num_filters, int filter_size, int stride, int padding, float**** weights, float**** weight_grads, float* bias_grads) {
     // Initialize weight and bias gradients to zero
     for (int f = 0; f < num_filters; f++) {
         for (int h = 0; h < filter_size; h++) {
@@ -85,7 +90,7 @@ void conv_backward(float*** input, float*** output_grad, float*** input_grad, Di
     }
 }
 
-void update_conv_weights(int num_filters, int filter_size, int input_channels, int output_height, int output_width, float**** conv_weights, float**** conv_grads, float* biases, float* bias_grads, Optimizer* optimizer, int layer_index) {
+void update_conv_weights(int num_filters, int filter_size, int input_channels, float**** conv_weights, float**** conv_grads, float* biases, float* bias_grads, Optimizer* optimizer, int layer_index) {
     int num_params = num_filters * filter_size * filter_size * input_channels;
     int counter = 0;
 
@@ -95,11 +100,11 @@ void update_conv_weights(int num_filters, int filter_size, int input_channels, i
                 for (int j = 0; j < filter_size; j++) {
                     for (int k = 0; k < filter_size; k++) {
                         for (int l = 0; l < input_channels; l++) {
-                            sgd(conv_weights[i][j][k][l], conv_grads[i][j][k][l], optimizer->optimizer.sgd->momentum, optimizer->optimizer.sgd->momentum_buffer[layer_index][i], optimizer->optimizer.sgd->learning_rate);
+                            conv_weights[i][j][k][l] -= sgd(conv_grads[i][j][k][l], optimizer->optimizer.sgd->momentum, optimizer->optimizer.sgd->momentum_buffer[layer_index][i], optimizer->optimizer.sgd->learning_rate);
                         }
                     }
                 }
-                sgd(biases[i], bias_grads[i], optimizer->optimizer.sgd->momentum, optimizer->optimizer.sgd->momentum_buffer[layer_index][num_params + i], optimizer->optimizer.sgd->learning_rate);
+                biases[i] -= sgd(bias_grads[i], optimizer->optimizer.sgd->momentum, optimizer->optimizer.sgd->momentum_buffer[layer_index][num_params + i], optimizer->optimizer.sgd->learning_rate);
             }
             break;
         case ADAM:
@@ -107,12 +112,12 @@ void update_conv_weights(int num_filters, int filter_size, int input_channels, i
                 for (int j = 0; j < filter_size; j++) {
                     for (int k = 0; k < filter_size; k++) {
                         for (int l = 0; l < input_channels; l++) {
-                            adam(conv_weights[i][j][k][l], conv_grads[i][j][k][l], optimizer->optimizer.adam->t, optimizer->optimizer.adam->m[layer_index][counter], optimizer->optimizer.adam->v[layer_index][counter], optimizer->optimizer.adam->beta1, optimizer->optimizer.adam->beta2, optimizer->optimizer.adam->epsilon, optimizer->optimizer.adam->learning_rate);
+                            conv_weights[i][j][k][l] -= adam(conv_grads[i][j][k][l], optimizer->optimizer.adam->t, optimizer->optimizer.adam->m[layer_index][counter], optimizer->optimizer.adam->v[layer_index][counter], optimizer->optimizer.adam->beta1, optimizer->optimizer.adam->beta2, optimizer->optimizer.adam->epsilon, optimizer->optimizer.adam->learning_rate);
                             counter++;
                         }
                     }
                 }
-                adam(biases[i], bias_grads[i], optimizer->optimizer.adam->t, optimizer->optimizer.adam->m[layer_index][num_params + i], optimizer->optimizer.adam->v[layer_index][num_params + i], optimizer->optimizer.adam->beta1, optimizer->optimizer.adam->beta2, optimizer->optimizer.adam->epsilon, optimizer->optimizer.adam->learning_rate);
+                biases[i] -= adam(bias_grads[i], optimizer->optimizer.adam->t, optimizer->optimizer.adam->m[layer_index][num_params + i], optimizer->optimizer.adam->v[layer_index][num_params + i], optimizer->optimizer.adam->beta1, optimizer->optimizer.adam->beta2, optimizer->optimizer.adam->epsilon, optimizer->optimizer.adam->learning_rate);
             }
             optimizer->optimizer.adam->t++;
             break;
@@ -121,12 +126,12 @@ void update_conv_weights(int num_filters, int filter_size, int input_channels, i
                 for (int j = 0; j < filter_size; j++) {
                     for (int k = 0; k < filter_size; k++) {
                         for (int l = 0; l < input_channels; l++) {
-                            rmsprop(conv_weights[i][j][k][l], conv_grads[i][j][k][l], optimizer->optimizer.rmsprop->square_avg_grad[layer_index][counter], optimizer->optimizer.rmsprop->rho, optimizer->optimizer.rmsprop->epsilon, optimizer->optimizer.rmsprop->learning_rate);
+                            conv_weights[i][j][k][l] -= rmsprop(conv_grads[i][j][k][l], optimizer->optimizer.rmsprop->square_avg_grad[layer_index][counter], optimizer->optimizer.rmsprop->rho, optimizer->optimizer.rmsprop->epsilon, optimizer->optimizer.rmsprop->learning_rate);
                             counter++;
                         }
                     }
                 }
-                rmsprop(biases[i], bias_grads[i], optimizer->optimizer.rmsprop->square_avg_grad[layer_index][num_params + i], optimizer->optimizer.rmsprop->rho, optimizer->optimizer.rmsprop->epsilon, optimizer->optimizer.rmsprop->learning_rate);
+                biases[i] -= rmsprop(bias_grads[i], optimizer->optimizer.rmsprop->square_avg_grad[layer_index][num_params + i], optimizer->optimizer.rmsprop->rho, optimizer->optimizer.rmsprop->epsilon, optimizer->optimizer.rmsprop->learning_rate);
             }
             break;
         default:

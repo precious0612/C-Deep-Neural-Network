@@ -6,7 +6,6 @@
 #include <math.h>
 
 #include "layer.h"
-#include "../../utils/utils.h"
 
 Layer* create_layer(LayerType type, LayerParams params) {
     Layer* new_layer = malloc(sizeof(Layer));
@@ -103,64 +102,66 @@ void initialize_layer(Layer* layer) {
     }
 }
 
-void layer_forward_pass(Layer* layer, float*** input, float*** output) {
+float*** layer_forward_pass(Layer* layer, float*** input) {
+    float*** output;
     switch (layer->type) {
         case CONVOLUTIONAL:
-            conv_forward(input, output, layer->input_shape, layer->output_shape,
+            output = conv_forward(input, layer->input_shape, layer->output_shape,
                          layer->params.conv_params.num_filters,
                          layer->params.conv_params.filter_size,
                          layer->params.conv_params.stride,
                          layer->params.conv_params.padding,
                          layer->weights.conv_weights, layer->biases.biases);
-            if (layer->params.conv_params.activation == "") {
+            if (is_empty_string(layer->params.conv_params.activation)) {
                 break;
             }
             // Apply activation function (e.g., ReLU, sigmoid, tanh, etc.)
-            apply_activation(layer->params.conv_params.activation,
-                             input, output, layer->output_shape,
-                             NULL, NULL);
+            output = apply_activation(layer->params.conv_params.activation,
+                                      output, layer->output_shape);
             break;
         case POOLING:
-            pool_forward(input, output, layer->input_shape, layer->output_shape,
-                         layer->params.pooling_params.pool_size,
-                         layer->params.pooling_params.stride,
-                         layer->params.pooling_params.pool_type);
+            output = pool_forward(input, layer->input_shape, layer->output_shape,
+                                  layer->params.pooling_params.pool_size,
+                                  layer->params.pooling_params.stride,
+                                  layer->params.pooling_params.pool_type);
             break;
         case FULLY_CONNECTED:
-            fc_forward(input, output[0], layer->input_shape, layer->output_shape,
-                       layer->params.fc_params.num_neurons,
-                       layer->weights.fc_weights,
-                       layer->biases.biases);
-            if (layer->params.conv_params.activation == "") {
+            output = (float***)malloc(sizeof(float**) * 1);
+            output[0] = (float**)malloc(sizeof(float*) * 1);
+            output[0][0] = fc_forward(input, layer->input_shape, layer->params.fc_params.num_neurons,
+                       layer->weights.fc_weights, layer->biases.biases);
+            if (is_empty_string(layer->params.fc_params.activation)) {
                 break;
             }
             // Apply activation function (e.g., ReLU, sigmoid, tanh, etc.)
-            apply_activation(layer->params.fc_params.activation,
-                             input, output, layer->output_shape,
-                             NULL, NULL);
+            output = apply_activation(layer->params.fc_params.activation,
+                                      output, layer->output_shape);
             break;
         case DROPOUT:
-            dropout_forward(input, output, layer->input_shape, layer->output_shape,
-                            layer->params.dropout_params.dropout_rate);
+            output = dropout_forward(input, layer->input_shape, layer->params.dropout_params.dropout_rate);
             break;
         case ACTIVATION:
-            apply_activation(layer->params.activation_params.activation,
-                            input, output, layer->input_shape,
-                            NULL, NULL);
+            output = apply_activation(layer->params.activation_params.activation,
+                                      input, layer->input_shape);
             break;
         case FLATTEN:
+            output = (float***)malloc(sizeof(float**) * 1);
+            output[0] = (float**)malloc(sizeof(float*) * 1);
+            output[0][0] = (float*)malloc(sizeof(float) * layer->output_shape.channels * layer->output_shape.height * layer->output_shape.width);
             flatten(input, output[0][0], layer->input_shape);
             break;
         default:
             fprintf(stderr, "Error: Unknown layer type.\n");
+            output = copy_3d_array(input, layer->input_shape);
             break;
     }
+    return output;
 }
 
 void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, float*** input_grad) {
     switch (layer->type) {
         case CONVOLUTIONAL:
-            if (layer->params.conv_params.activation[0] != '\0') {
+            if (not_empty_string(layer->params.conv_params.activation)) {
                 apply_activation_backward(layer->params.conv_params.activation,
                                           input, output_grad, output_grad,
                                           layer->output_shape);
@@ -170,7 +171,7 @@ void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, flo
                           layer->params.conv_params.filter_size,
                           layer->params.conv_params.stride,
                           layer->params.conv_params.padding,
-                          layer->weights.conv_weights, layer->biases.biases, layer->grads.conv_grads, layer->biases.bias_grads);
+                          layer->weights.conv_weights, layer->grads.conv_grads, layer->biases.bias_grads);
             break;
         case POOLING:
             pool_backward(input, output_grad, input_grad, layer->input_shape, layer->output_shape,
@@ -179,7 +180,7 @@ void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, flo
                           layer->params.pooling_params.pool_type);
             break;
         case FULLY_CONNECTED:
-            if (layer->params.fc_params.activation[0] != '\0') {
+            if (not_empty_string(layer->params.fc_params.activation)) {
                 apply_activation_backward(layer->params.fc_params.activation,
                                           input, output_grad, output_grad,
                                           layer->output_shape);
@@ -187,16 +188,16 @@ void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, flo
             if (layer->prev_layer == NULL) {
                 fc_backward(input, output_grad[0], input_grad, layer->input_shape,
                             layer->params.fc_params.num_neurons, layer->weights.fc_weights,
-                            layer->biases.biases, layer->grads.fc_grads, layer->biases.bias_grads, 0);
+                            layer->grads.fc_grads, layer->biases.bias_grads, 0);
                 break;
             }
             fc_backward(input, output_grad[0], input_grad, layer->input_shape,
                         layer->params.fc_params.num_neurons, layer->weights.fc_weights,
-                        layer->biases.biases, layer->grads.fc_grads, layer->biases.bias_grads, layer->input_shape.height == 1 && layer->input_shape.width == 1);
+                        layer->grads.fc_grads, layer->biases.bias_grads, 
+                        layer->input_shape.height == 1 && layer->input_shape.width == 1);
             break;
         case DROPOUT:
-            dropout_backward(input, output_grad, input_grad, layer->input_shape, layer->output_shape,
-                             layer->params.dropout_params.dropout_rate);
+            dropout_backward(input, output_grad, input_grad, layer->input_shape);
             break;
         case ACTIVATION:
             apply_activation_backward(layer->params.activation_params.activation,
@@ -216,8 +217,8 @@ void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
     switch (layer->type) {
         case CONVOLUTIONAL:
             update_conv_weights(layer->params.conv_params.num_filters, layer->params.conv_params.filter_size,
-                                layer->input_shape.channels, layer->output_shape.height, layer->output_shape.width,
-                                layer->weights.conv_weights, layer->grads.conv_grads, layer->biases.biases, 
+                                layer->input_shape.channels, layer->weights.conv_weights, 
+                                layer->grads.conv_grads, layer->biases.biases, 
                                 layer->biases.bias_grads, optimizer, layer_index);
             break;
         case FULLY_CONNECTED:
@@ -266,7 +267,6 @@ void compute_output_shape(Layer* layer) {
 
                 int input_height = layer->input_shape.height;
                 int input_width = layer->input_shape.width;
-                int input_channels = layer->input_shape.channels;
 
                 int output_height = (input_height - filter_size + 2 * padding) / stride + 1;
                 int output_width = (input_width - filter_size + 2 * padding) / stride + 1;
@@ -328,8 +328,8 @@ void compute_output_shape(Layer* layer) {
 void delete_layer(Layer* layer) {
     switch (layer->type) {
         case CONVOLUTIONAL:
-            free_4d_float_array(layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->params.conv_params.filter_size, layer->input_shape.channels);
-            free_4d_float_array(layer->grads.conv_grads, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->params.conv_params.filter_size, layer->input_shape.channels);
+            free_4d_float_array(layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->params.conv_params.filter_size);
+            free_4d_float_array(layer->grads.conv_grads, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->params.conv_params.filter_size);
             free(layer->biases.biases);
             free(layer->biases.bias_grads);
             break;

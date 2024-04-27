@@ -5,8 +5,8 @@
 
 int**** malloc_4d_int_array(int dim1, int dim2, int dim3, int dim4);
 float**** malloc_4d_float_array(int dim1, int dim2, int dim3, int dim4);
-void free_4d_int_array(int**** arr, int dim1, int dim2, int dim3, int dim4);
-void free_4d_float_array(float**** arr, int dim1, int dim2, int dim3, int dim4);
+void free_4d_int_array(int**** arr, int dim1, int dim2, int dim3);
+void free_4d_float_array(float**** arr, int dim1, int dim2, int dim3);
 int*** malloc_3d_int_array(int dim1, int dim2, int dim3);
 float*** malloc_3d_float_array(int dim1, int dim2, int dim3);
 void free_3d_int_array(int*** arr, int dim1, int dim2);

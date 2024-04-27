@@ -248,7 +248,7 @@ float*** loadFloatPNG(const char* pngFileName, int* width, int* height) {
     png_read_info(pngPtr, infoPtr);
 
     int bitDepth, colorType;
-    png_get_IHDR(pngPtr, infoPtr, width, height, &bitDepth, &colorType, NULL, NULL, NULL);
+    png_get_IHDR(pngPtr, infoPtr, (unsigned int*)width, (unsigned int*)height, &bitDepth, &colorType, NULL, NULL, NULL);
 
     if (bitDepth != 8) {
         fprintf(stderr, "Unsupported bit depth in PNG image (must be 8)\n");
@@ -326,7 +326,7 @@ int*** loadIntPNG(const char* pngFileName, int* width, int* height) {
     png_read_info(pngPtr, infoPtr);
 
     int bitDepth, colorType;
-    png_get_IHDR(pngPtr, infoPtr, width, height, &bitDepth, &colorType, NULL, NULL, NULL);
+    png_get_IHDR(pngPtr, infoPtr, (unsigned int*)width, (unsigned int*)height, &bitDepth, &colorType, NULL, NULL, NULL);
 
     if (bitDepth != 8) {
         fprintf(stderr, "Unsupported bit depth in PNG image (must be 8)\n");
@@ -742,9 +742,9 @@ void resize_image(InputData **image_data_ptr, const Dimensions original_dimensio
 }
 
 // Preprocess input data (e.g., normalization, resizing)
-void preprocess_input(InputData* input_data, Dimensions input_shape) {
-    // Assuming input_data is already loaded and preprocessed
-}
+// void preprocess_input(InputData* input_data, Dimensions input_shape) {
+//     // Assuming input_data is already loaded and preprocessed
+// }
 
 void free_image_data(InputData *image_data, Dimensions dimensions, DataType data_type) {
     if (image_data == NULL) {

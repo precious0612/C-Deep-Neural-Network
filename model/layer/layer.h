@@ -83,7 +83,7 @@ Layer* create_layer(LayerType type, LayerParams params);
 void initialize_layer(Layer* layer);
 
 // Define function to forward pass through a layer
-void layer_forward_pass(Layer* layer, float*** input, float*** output);
+float*** layer_forward_pass(Layer* layer, float*** input);
 
 // Define function to backward pass through a layer
 void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, float*** input_grad);

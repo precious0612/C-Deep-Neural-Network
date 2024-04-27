@@ -9,6 +9,7 @@
 #include "train.h"
 #include "loss.h"
 #include "rand.h"
+#include "tools.h"
 
 // Computing functions
 #include "compute/convolution.h"

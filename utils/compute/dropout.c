@@ -4,11 +4,13 @@
 #include <string.h>
 
 #include "dropout.h"
+#include "../rand.h"
 #include "../memory.h"
+#include "../tensor.h"
 
-void dropout_forward(float*** input, float*** output, Dimensions input_shape, Dimensions output_shape, float dropout_rate) {
-    // Copy input to output
-    memcpy(output, input, sizeof(float) * input_shape.height * input_shape.width * input_shape.channels);
+float*** dropout_forward(float*** input, Dimensions input_shape, float dropout_rate) {
+    // Allocate memory for the output
+    float*** output = copy_3d_array(input, input_shape);
 
     // Apply dropout
     for (int y = 0; y < input_shape.height; y++) {
@@ -20,9 +22,11 @@ void dropout_forward(float*** input, float*** output, Dimensions input_shape, Di
             }
         }
     }
+
+    return output;
 }
 
-void dropout_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape, Dimensions output_shape, float dropout_rate) {
+void dropout_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {
     // Compute gradients for the input
     for (int y = 0; y < input_shape.height; y++) {
         for (int x = 0; x < input_shape.width; x++) {

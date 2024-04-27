@@ -17,6 +17,7 @@
 #include "../utils/loss.c"
 #include "../utils/metric.c"
 #include "../utils/optim.c"
+#include "../utils/tools.c"
 #include "../utils/compute/convolution.c"
 #include "../utils/compute/pooling.c"
 #include "../utils/compute/fully_connected.c"
@@ -60,7 +61,7 @@ int main() {
     compile_model(model, "SGD", 0.01f, "mse", "accuracy");
 
     // Load dataset
-    Dataset* dataset = load_dataset_from_json("/Users/precious/Design_Neural_Network/input/test_pic/dataset.json", input_dim, FLOAT32);
+    Dataset* dataset = load_dataset_from_json("/Users/precious/Design_Neural_Network/dataset example/test_data_and_val/dataset.json", input_dim, FLOAT32, 1);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset\n");
         return 1;

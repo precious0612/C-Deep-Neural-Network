@@ -71,7 +71,7 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
 void resize_image(InputData **image_data_ptr, const Dimensions original_dimensions, Dimensions new_dimensions, DataType data_type);
 
 // Preprocess the input data (unfinished)
-void preprocess_input(InputData* input_data, Dimensions input_shape);
+// void preprocess_input(InputData* input_data, Dimensions input_shape);
 
 // Free the memory associated with an image
 void free_image_data(InputData *image_data, Dimensions dimensions, DataType data_type);

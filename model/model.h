@@ -46,16 +46,16 @@ void compile_model(Model* model, char* optimizer, float learning_rate, char* los
 void print_model_info(Model* model);
 
 // Perform forward pass through the model
-void forward_pass(Model* model, float*** input, float*** output);
+float*** forward_pass(Model* model, float*** input);
 
 // Perform backward pass through the model
-void backward_pass(Model* model, float*** input, float*** output, float*** output_grad);
+void backward_pass(Model* model, float*** input, float*** output_grad);
 
 // Perform forward pass through the model for a batch of inputs
-void forward_pass_batch(Model* model, float**** batch_inputs, float**** batch_outputs, int batch_size);
+float**** forward_pass_batch(Model* model, float**** batch_inputs, int batch_size);
 
 // Perform backward pass through the model for a batch of inputs
-void backward_pass_batch(Model* model, float**** batch_inputs, float**** batch_outputs, float**** batch_output_grads, float learning_rate, int batch_size);
+void backward_pass_batch(Model* model, float**** batch_inputs, float**** batch_output_grads, int batch_size);
 
 // Update the model weights
 void update_model_weights(Model* model);

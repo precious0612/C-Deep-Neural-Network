@@ -1,8 +1,11 @@
 /* utils/rand.c */
 
+#include <stdlib.h>
 #include <time.h>
 
 #include "rand.h"
+
+// #define RAND_MAX 32767
 
 float rand_uniform(float min, float max) {
     static int seeded = 0;

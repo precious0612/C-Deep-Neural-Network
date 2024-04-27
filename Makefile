@@ -1,36 +1,29 @@
-# Compiler and flags
 CC = clang
-CFLAGS = -Wall -Wextra -Werror -I/usr/local/include/stb -I/opt/homebrew/Cellar/json-c/0.17/include -I/opt/homebrew/Cellar/json-c/0.17/include/json-c -I/opt/homebrew/Cellar/jpeg-turbo/3.0.2/include -I/opt/homebrew/opt/libpng/include/libpng16
+CFLAGS = -Wall -Wextra -I/usr/local/include/stb -I/opt/homebrew/Cellar/json-c/0.17/include -I/opt/homebrew/Cellar/json-c/0.17/include/json-c -I/opt/homebrew/Cellar/jpeg-turbo/3.0.2/include -I/opt/homebrew/opt/libpng/include/libpng16
 LDFLAGS = -L/opt/homebrew/Cellar/json-c/0.17/lib -L/opt/homebrew/Cellar/jpeg-turbo/3.0.2/lib -L/opt/homebrew/opt/libpng/lib
 LDLIBS = -ljson-c -lturbojpeg -lpng16
 
-# Directories
-SRC_DIR = .
-OBJ_DIR = obj
-BIN_DIR = bin
+# 排除 main.c
+SOURCES = $(filter-out main.c, $(wildcard *.c input/data.c model/model.c model/layer/layer.c optimizer/optimizer.c utils/*.c utils/compute/*.c))
+OBJECTS = $(patsubst %.c, %.o, $(SOURCES))
+HEADERS = $(wildcard *.h input/*.h model/*.h model/layer/*.h optimizer/*.h utils/*.h utils/compute/*.h)
+EXAMPLE_EXECUTABLE = main
 
-# Source files
-SRCS = $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
-DEPS = $(OBJS:.o=.d)
+all: $(EXAMPLE_EXECUTABLE)
 
-# Executable name
-TARGET = $(BIN_DIR)/CNN
+$(EXAMPLE_EXECUTABLE): main.o $(OBJECTS)
+	$(CC) $(LDFLAGS) main.o $(OBJECTS) $(LDLIBS) -o $@
 
-.PHONY: all clean
+main.o: main.c $(HEADERS)
+	$(CC) $(CFLAGS) -c main.c -o main.o
 
-all: $(TARGET)
-
-$(TARGET): $(OBJS) | $(BIN_DIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
-
-$(OBJ_DIR) $(BIN_DIR):
-	mkdir -p $@
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
+	rm -f $(OBJECTS) 
 
--include $(DEPS)
+run_example: $(EXAMPLE_EXECUTABLE)
+	./$(EXAMPLE_EXECUTABLE)
+
+.PHONY: all clean run_example

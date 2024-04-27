@@ -3,11 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
+#include <math.h>
 
 #include "pooling.h"
 #include "../memory.h"
 
-void pool_forward(float*** input, float*** output, Dimensions input_shape, Dimensions output_shape, int pool_size, int stride, char* pool_type) {
+float*** pool_forward(float*** input, Dimensions input_shape, Dimensions output_shape, int pool_size, int stride, char* pool_type) {
+    // Allocate memory for the output
+    float*** output = malloc_3d_float_array(output_shape.height, output_shape.width, output_shape.channels);
+
     // Iterate over output elements
     for (int out_ch = 0; out_ch < input_shape.channels; out_ch++) {
         for (int out_y = 0; out_y < output_shape.height; out_y++) {
@@ -34,6 +38,8 @@ void pool_forward(float*** input, float*** output, Dimensions input_shape, Dimen
             }
         }
     }
+
+    return output;
 }
 
 void pool_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape, Dimensions output_shape, int pool_size, int stride, char* pool_type) {

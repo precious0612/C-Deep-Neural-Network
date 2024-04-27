@@ -12,8 +12,8 @@
  * - `int`: The number of classes (channels) in the output tensor
  * - `float***`: The output gradient tensor to be filled by the function
  */
-typedef void (*LossFunction)(float***, int, int, int, int, float***);
-void categorical_crossentropy_loss(float*** output, int label, int batch_size, int height, int num_classes, float*** output_grad);
-void mean_squared_error_loss(float*** output, int label, int batch_size, int height, int num_classes, float*** output_grad);
+typedef float (*LossFunction)(float*, int, int);
+float categorical_crossentropy_loss(float* output, int label, int num_classes);
+float mean_squared_error_loss(float* output, int label, int num_classes);
 
 #endif // /* LOSS_H */

@@ -112,7 +112,7 @@ float**** malloc_4d_float_array(int dim1, int dim2, int dim3, int dim4) {
     return arr;
 }
 
-void free_4d_int_array(int**** arr, int dim1, int dim2, int dim3, int dim4) {
+void free_4d_int_array(int**** arr, int dim1, int dim2, int dim3) {
     if (arr == NULL) {
         return;
     }
@@ -135,7 +135,7 @@ void free_4d_int_array(int**** arr, int dim1, int dim2, int dim3, int dim4) {
     free(arr);
 }
 
-void free_4d_float_array(float**** arr, int dim1, int dim2, int dim3, int dim4) {
+void free_4d_float_array(float**** arr, int dim1, int dim2, int dim3) {
     if (arr == NULL) {
         return;
     }
@@ -211,6 +211,11 @@ float*** malloc_3d_float_array(int dim1, int dim2, int dim3) {
                     free(arr[i][k]);
                 }
                 free(arr[i]);
+                for (int l = 0; l < i; l++) {
+                    free(arr[l]);
+                }
+                free(arr);
+                return NULL;
             }
         }
     }

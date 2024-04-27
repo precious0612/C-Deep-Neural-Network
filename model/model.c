@@ -67,7 +67,7 @@ void add_layer(Model* model, char* layer_type, int num_filters, int filter_size,
 }
 
 void set_optimizer(Model* model, const char* optimizer, float learning_rate) {
-    strcpy(model->optimizer, optimizer);
+    strcpy(model->optimizer_name, optimizer);
     model->learning_rate = learning_rate;
 }
 
@@ -197,17 +197,25 @@ void compile_model(Model* model, char* optimizer_name, float learning_rate, char
     }
 }
 
-void forward_pass(Model* model, float*** input, float*** output) {
-    float*** temp_output = input;
-    for (int i = 0; i < model->num_layers; i++) {
-        float*** layer_output = allocate_output_tensor(model->layers[i]->output_shape);
-        layer_forward_pass(model->layers[i], temp_output, layer_output);
-        temp_output = layer_output;
+float*** forward_pass(Model* model, float*** input) {
+    float*** output;
+
+    if (model->num_layers == 0) {
+        fprintf(stderr, "Error: Model does not have any layers.\n");
+        return copy_3d_array(input, model->input);
+    } else {
+        output = layer_forward_pass(model->layers[0], input);
     }
-    output = temp_output;
+
+    for (int i = 1; i < model->num_layers; i++) {
+        output = layer_forward_pass(model->layers[i], output);
+    }
+
+    return output;
 }
 
-void backward_pass(Model* model, float*** input, float*** output, float*** output_grad) {
+
+void backward_pass(Model* model, float*** input, float*** output_grad) {
     float*** temp_input_grad = output_grad;
     for (int i = model->num_layers - 1; i >= 0; i--) {
         float*** layer_input_grad = allocate_grad_tensor(model->layers[i]->input_shape);
@@ -221,21 +229,18 @@ void backward_pass(Model* model, float*** input, float*** output, float*** outpu
     // }
 }
 
-void forward_pass_batch(Model* model, float**** batch_inputs, float**** batch_outputs, int batch_size) {
+float**** forward_pass_batch(Model* model, float**** batch_inputs, int batch_size) {
+    float ****batch_outputs = (float****)malloc(sizeof(float***) * batch_size);
     for (int i = 0; i < batch_size; i++) {
-        forward_pass(model, batch_inputs[i], batch_outputs[i]);
+        batch_outputs[i] = forward_pass(model, batch_inputs[i]);
     }
+    return batch_outputs;
 }
 
-void backward_pass_batch(Model* model, float**** batch_inputs, float**** batch_outputs, float**** batch_output_grads, float learning_rate, int batch_size) {
+void backward_pass_batch(Model* model, float**** batch_inputs, float**** batch_output_grads, int batch_size) {
     for (int i = 0; i < batch_size; i++) {
-        backward_pass(model, batch_inputs[i], batch_outputs[i], batch_output_grads[i]);
+        backward_pass(model, batch_inputs[i], batch_output_grads[i]);
     }
-
-    // // Update weights and biases for all layers
-    // for (int i = 0; i < model->num_layers; i++) {
-    //     update_layer_weights(model->layers[i], learning_rate, batch_size);
-    // }
 }
 
 void update_model_weights(Model* model) {
@@ -256,8 +261,9 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
     for (int epoch = 0; epoch < num_epochs; epoch++) {
         Dataset* batch = dataset;
         while (batch != NULL) {
+            int batch_num = 0;
             float**** batch_inputs = (float****)malloc(sizeof(float***) * batch->batch_size);
-            float**** batch_outputs = (float****)malloc(sizeof(float***) * batch->batch_size);
+            float**** batch_outputs;
             int* batch_labels = batch->labels;
 
             for (int i = 0; i < batch->batch_size; i++) {
@@ -270,9 +276,15 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
                         break;
                     default:
                         fprintf(stderr, "Error: Invalid data type specified.\n");
+                        // Free the allocated memory before returning
+                        for (int j = 0; j < i; j++) {
+                            free_tensor(batch_outputs[j], model->output);
+                        }
+                        free(batch_inputs);
+                        free(batch_outputs);
                         return;
                 }
-                batch_outputs[i] = allocate_output_tensor(model->output);
+                // batch_outputs[i] = allocate_output_tensor(model->output);
             }
 
             float**** batch_output_grads = (float****)malloc(sizeof(float***) * batch->batch_size);
@@ -280,22 +292,39 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
                 batch_output_grads[i] = allocate_grad_tensor(model->output);
             }
 
-            forward_pass_batch(model, batch_inputs, batch_outputs, batch->batch_size);
-            compute_output_grad(batch_outputs, batch_labels, model->loss_fn, batch_output_grads, batch->batch_size, model->output);
-            backward_pass_batch(model, batch_inputs, batch_outputs, batch_output_grads, model->learning_rate, batch->batch_size);
+            batch_outputs = forward_pass_batch(model, batch_inputs, batch->batch_size);
+            compute_output_grad_batch(batch_outputs, batch_labels, batch_output_grads, batch->batch_size, model->output.height, model->output.width, model->output.channels);
+            backward_pass_batch(model, batch_inputs, batch_output_grads, batch->batch_size);
             update_model_weights(model);
             // reset_model_grads(model);  // reset operation has been finished at the beginning of the backward pass in each layer
 
+            // Print progress
+            printf("Epoch %d, Batch %d, DataNum %d\n", epoch + 1, batch_num, batch->num_images);
 
+            // Print loss and accuracy for the batch
+            float loss = compute_loss_batch(batch_outputs, batch_labels, model->loss_fn, batch->batch_size, model->output.channels);
+            float accuracy = compute_accuracy(batch_outputs, batch_labels, batch->batch_size, model->output.channels);
+            printf("Epoch %d, Batch Loss: %.6f, Batch Accuracy: %.2f%%\n", epoch + 1, loss, accuracy * 100.0f);
+
+            // Free the allocated memory for batch_outputs and batch_output_grads
             for (int i = 0; i < batch->batch_size; i++) {
                 free_tensor(batch_outputs[i], model->output);
                 free_tensor(batch_output_grads[i], model->output);
             }
+
             free(batch_inputs);
             free(batch_outputs);
             free(batch_output_grads);
 
             batch = batch->next_batch;
+        }
+        // Print progress
+        printf("Epoch %d completed.\n", epoch + 1);
+
+        // Evaluate the model on the validation dataset
+        if (dataset->val_dataset != NULL) {
+            float val_accuracy = evaluate_model(model, dataset->val_dataset);
+            printf("Validation Accuracy: %.2f%%\n", val_accuracy * 100.0f);
         }
     }
 }
@@ -307,22 +336,23 @@ float evaluate_model(Model* model, Dataset* dataset) {
     Dataset* batch = dataset;
     while (batch != NULL) {
         for (int i = 0; i < batch->num_images; i++) {
-            preprocess_input(batch->images[i], model->input);
-            float*** output = allocate_output_tensor(model->output);
+            // preprocess_input(batch->images[i], model->input);
+            // float*** output = allocate_output_tensor(model->output);
+            float*** output;
 
             switch (batch->data_type) {
                     case Int:
-                        forward_pass(model, batch->images[i]->int_data, output);
+                        output = forward_pass(model, batch->images[i]->int_data);
                         break;
                     case FLOAT32:
-                        forward_pass(model, batch->images[i]->float32_data, output);
+                        output = forward_pass(model, batch->images[i]->float32_data);
                         break;
                     default:
                         fprintf(stderr, "Error: Invalid data type specified.\n");
                         return 0.0f;
                 }
 
-            int prediction = get_prediction(output, model->metric_name, model->output);
+            int prediction = get_prediction(output, model->metric_name, model->output.channels);
             if (prediction == batch->labels[i]) {
                 correct_predictions++;
             }

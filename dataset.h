@@ -1,4 +1,4 @@
-/* input/dataset.h (high-level)
+/* dataset.h (high-level)
 
  * This file defines a structure to hold a dataset of images, along with its properties.
  * The dataset is a linked list of images, each with its own label (an integer).
@@ -21,6 +21,7 @@ typedef struct Dataset {
     InputData** images;
     int* labels;
     struct Dataset* next_batch;
+    struct Dataset* val_dataset;
 } Dataset;
 
 /* 
@@ -50,6 +51,7 @@ typedef struct Dataset {
  * - file_path: Path to the JSON file containing dataset information.
  * - input_dimensions: Dimensions of the input data (width, height, channels).
  * - data_type: Type of data in the dataset (Int or FLOAT32).
+ * - include_val_dataset: 1 if the dataset contains a val folder include validation dataset, 0 otherwise.
  *
  * Returns:
  * - A pointer to the loaded Dataset struct if successful, NULL otherwise.
@@ -59,12 +61,12 @@ typedef struct Dataset {
  * Usage example:
  * 
  * Dimensions input_dimensions = {28, 28, 1};
- * Dataset* dataset = load_dataset_from_json("dataset.json", input_dimensions, FLOAT32);
+ * Dataset* dataset = load_dataset_from_json("dataset.json", input_dimensions, FLOAT32, 1);
  * if (dataset == NULL) {
  *     // Handle error
  * }
  */
-Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensions, DataType data_type);
+Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensions, DataType data_type, int include_val_dataset);
 
 /* 
  * Function to create a JSON file describing a dataset from image files in a folder structure.
@@ -75,6 +77,10 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
  *
  * Parameters:
  * - folder_path: Path to the root folder containing the dataset images organized in subfolders by class.
+ * - include_val_dataset: 1 if the dataset contains a val folder include validation dataset, 0 otherwise.
+ * - validation_size: The ratio of the validation dataset (if include_val_dataset is 0, this parameter is ignored).
+ * Tips: If you want to create a JSON file for a dataset that contains a val folder, 
+ * you set include_val_dataset to 1 and the validation_size will be ignored.
  *
  * Note: The created JSON file will have the following structure:
  * {
@@ -86,16 +92,39 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
  *       "label": "Label of the image (folder name)"
  *     },
  *     ...
+ *   ],
+ *   "validation_size": Ratio of the validation dataset
+ * }
+ * Or if include_val_dataset is 1:
+ * {
+ *   "dataset_name": "Name of the dataset",
+ *   "num_images": Number of images in the dataset,
+ *   "images": [
+ *     {
+ *       "file_path": "Path to the image file",
+ *       "label": "Label of the image (folder name)"
+ *     },
+ *     ...
+ *   ],
+ *   "val_dataset": "Relative path to the validation dataset folder",
+ *   "num_val_images": Number of images in the validation dataset,
+ *   "val_images": [
+ *    {
+ *      "file_path": "Path to the image file",
+ *     "label": "Label of the image (folder name)"
+ *    },
+ *    ...
  *   ]
  * }
  *
  * Usage example:
  * 
- * create_dataset_json_file("dataset_folder");
+ * create_dataset_json_file("dataset_folder", 1, 0.0f);
+ * create_dataset_json_file("dataset_folder", 0, 0.2f);
  * 
  * P.S. the JSON file will be created in the same folder as the dataset_folder
  */
-void create_dataset_json_file(const char* folder_path);
+void create_dataset_json_file(const char* folder_path, int include_val_dataset, float validation_size);
 
 /* 
  * Function to split a dataset into multiple batches in-place.

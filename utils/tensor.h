@@ -7,6 +7,7 @@
 
 float*** allocate_output_tensor(Dimensions output_shape);
 float*** allocate_grad_tensor(Dimensions shape);
+float*** copy_3d_array(float*** src, Dimensions shape);
 void free_tensor(float*** tensor, Dimensions tensor_shape);
 
 #endif // /* TENSOR_H */
