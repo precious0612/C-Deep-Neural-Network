@@ -14,11 +14,11 @@ int main() {
     // Define input dimensions
     Dimensions input_dimensions = {INPUT_WIDTH, INPUT_HEIGHT, INPUT_CHANNELS}; // Example dimensions
 
-    create_dataset_json_file("/Users/precious/Design_Neural_Network/dataset example/test_data_without_val", 0, 0.5);
+    create_dataset_json_file("dataset example/test_data_without_val", 0, 0.5);
 
     // Load dataset from JSON file
     printf("Loading dataset from JSON file...\n");
-    Dataset* dataset = load_dataset_from_json("/Users/precious/Design_Neural_Network/dataset example/test_data_without_val/dataset.json", input_dimensions, Int, 0);
+    Dataset* dataset = load_dataset_from_json("dataset example/test_data_without_val/dataset.json", input_dimensions, Int, 0);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset from JSON file\n");
         return 1;
@@ -41,7 +41,7 @@ int main() {
 
     // Create a new JSON file from dataset
     printf("Creating JSON file from dataset...\n");
-    create_dataset_json_file("/Users/precious/Design_Neural_Network/dataset example/test_data_and_val", 1, 0.5);
+    create_dataset_json_file("dataset example/test_data_and_val", 1, 0.5);
     printf("JSON file created successfully\n");
 
     // Split dataset into batches

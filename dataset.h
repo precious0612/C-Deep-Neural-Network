@@ -36,11 +36,11 @@ typedef struct Dataset {
  *   "num_images": 2,
  *   "images": [
  *     {
- *       "file_path": "/Users/precious/Design_Neural_Network/input/test_pic/0/test.jpeg",
+ *       "file_path": "input/test_pic/0/test.jpeg",
  *       "label": "0"
  *     }
  * ,    {
- *       "file_path": "/Users/precious/Design_Neural_Network/input/test_pic/1/test.png",
+ *       "file_path": "input/test_pic/1/test.png",
  *       "label": "1"
  *     }
  *   ]

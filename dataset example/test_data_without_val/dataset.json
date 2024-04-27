@@ -3,19 +3,19 @@
   "num_images": 4,
   "images": [
     {
-      "file_path": "/Users/precious/Design_Neural_Network/dataset example/test_data_without_val/0/test.jpeg",
+      "file_path": "dataset example/test_data_without_val/0/test.jpeg",
       "label": "0"
     }
 ,    {
-      "file_path": "/Users/precious/Design_Neural_Network/dataset example/test_data_without_val/0/IMG_0255_smaller.jpeg",
+      "file_path": "dataset example/test_data_without_val/0/IMG_0255_smaller.jpeg",
       "label": "0"
     }
 ,    {
-      "file_path": "/Users/precious/Design_Neural_Network/dataset example/test_data_without_val/1/test.png",
+      "file_path": "dataset example/test_data_without_val/1/test.png",
       "label": "1"
     }
 ,    {
-      "file_path": "/Users/precious/Design_Neural_Network/dataset example/test_data_without_val/1/1528_1307.png",
+      "file_path": "dataset example/test_data_without_val/1/1528_1307.png",
       "label": "1"
     }
   ]

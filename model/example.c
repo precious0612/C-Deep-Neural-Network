@@ -61,7 +61,7 @@ int main() {
     compile_model(model, "SGD", 0.01f, "mse", "accuracy");
 
     // Load dataset
-    Dataset* dataset = load_dataset_from_json("/Users/precious/Design_Neural_Network/dataset example/test_data_and_val/dataset.json", input_dim, FLOAT32, 1);
+    Dataset* dataset = load_dataset_from_json("dataset example/test_data_and_val/dataset.json", input_dim, FLOAT32, 1);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset\n");
         return 1;

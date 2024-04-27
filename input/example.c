@@ -6,7 +6,7 @@
 
 int main() {
     // Load the test image
-    const char *filename = "/Users/precious/Design_Neural_Network/input/test_pic/0/test.jpeg";
+    const char *filename = "input/test_pic/0/test.jpeg";
     Dimensions new_dimensions;
     new_dimensions.width = 100;
     new_dimensions.height = 100;

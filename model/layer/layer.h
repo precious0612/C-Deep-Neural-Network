@@ -1,10 +1,19 @@
 /* model/layer/layer.h 
- *
+ * 
  * This file defines the interface for the layer object in the CNN model.
+ *
  * The layer object contains the necessary information to perform the forward
  * pass, backward pass, and update the parameters for a specific layer in the
  * model.
  *
+ * This header file provides the following functionality:
+ *
+ * 1. Definition of layer types (e.g., convolutional, pooling, fully connected)
+ * 2. Structure definitions for layer parameters, weights, and biases
+ * 3. Function declarations for creating, initializing, and deleting layers
+ * 4. Function declarations for forward and backward passes through a layer
+ * 5. Function declarations for updating layer weights and resetting gradients
+ * 6. Function declaration for computing the output shape of a layer
  */
 
 #ifndef LAYER_H
@@ -76,28 +85,146 @@ typedef struct Layer {
     struct Layer* prev_layer; // Pointer to the previous layer in the model
 } Layer;
 
-// Define function to create a new layer
+/*
+ * Creates a new layer of the specified type with the given parameters.
+ *
+ * Parameters:
+ * - type: The type of the layer (e.g., CONVOLUTIONAL, POOLING, FULLY_CONNECTED).
+ * - params: The parameters specific to the layer type.
+ * 
+ * Returns:
+ * - A pointer to the newly created Layer struct, or NULL if memory allocation fails.
+ *
+ * Tips: The returned layer must be initialized using the initialize_layer function before use.
+ *
+ * Usage example:
+ *
+ * LayerParams conv_params = {
+ *     .conv_params = {
+ *         .num_filters = 32,
+ *         .filter_size = 3,
+ *         .stride = 1,
+ *         .padding = 1,
+ *         .activation = "relu"
+ *     }
+ * };
+ * Layer* conv_layer = create_layer(CONVOLUTIONAL, conv_params);
+ * if (conv_layer == NULL) {
+ *     // Handle error
+ * }
+ * initialize_layer(conv_layer);
+ */
 Layer* create_layer(LayerType type, LayerParams params);
 
-// Define function to initialize the weights and biases for a layer
+/*
+ * Initializes the weights and biases for the given layer.
+ *
+ * Parameters:
+ * - layer: A pointer to the Layer struct to be initialized.
+ *
+ * Usage example:
+ *
+ * Layer* conv_layer = create_layer(CONVOLUTIONAL, conv_params);
+ * initialize_layer(conv_layer);
+ */
 void initialize_layer(Layer* layer);
 
-// Define function to forward pass through a layer
+/*
+ * Performs the forward pass through the given layer.
+ *
+ * Parameters:
+ * layer: A pointer to the Layer struct.
+ * input: A 3D array containing the input data for the layer.
+ * 
+ * Returns:
+ * - A 3D array containing the output data from the layer.
+ *
+ * Usage example:
+ *
+ * float*** input_data = ...; // Load or generate input data
+ * float*** output_data = layer_forward_pass(conv_layer, input_data);
+ * if (output_data == NULL) {
+ *     // Handle error
+ * }
+ * // Process output_data
+ * free_3d_array(output_data, conv_layer->output_shape);
+ */
 float*** layer_forward_pass(Layer* layer, float*** input);
 
-// Define function to backward pass through a layer
+/*
+ * Performs the backward pass through the given layer.
+ *
+ * Parameters:
+ * - layer: A pointer to the Layer struct.
+ * - input: A 3D array containing the input data for the layer.
+ * - output_grad: A 3D array containing the gradient of the output from the layer.
+ * - input_grad: A 3D array to store the gradient of the input to the layer.
+ *
+ * Usage example:
+ *
+ * float*** input_data = ...; // Load or generate input data
+ * float*** output_grad = ...; // Compute or load output gradient
+ * float*** input_grad = allocate_3d_array(layer->input_shape);
+ * layer_backward_pass(conv_layer, input_data, output_grad, input_grad);
+ * // Process input_grad
+ * free_3d_array(input_grad, conv_layer->input_shape);
+ */
 void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, float*** input_grad);
 
-// Function to update weights and biases for a layer 
+/*
+ * Updates the weights and biases of the given layer using the specified optimizer.
+ *
+ * Parameters:
+ * - layer: A pointer to the Layer struct.
+ * - optimizer: A pointer to the Optimizer struct to be used for updating the weights and biases.
+ * - layer_index: The index of the layer in the neural network model.
+ * Tips: Optimizer is a struct that contains the optimizer type and hyperparameters, 
+ *       which is defined in optimizer/optimizer.h.
+ *
+ * Usage example:
+ *
+ * num_weights = conv_layer->output_shape.depth * conv_layer->output_shape.height * conv_layer->output_shape.width;
+ * Optimizer* optimizer = create_optimizer("Adam", 0.001, num_weights);
+ * update_layer_weights(conv_layer, optimizer, 0); // Update weights for the first layer
+ * delete_optimizer(optimizer);
+ */
 void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index);
 
-// Function to reset the gradients for a layer
+/*
+ * Resets the gradients for the given layer to zero.
+ *
+ * Parameters:
+ * - layer: A pointer to the Layer struct.
+ *
+ * Usage example:
+ *
+ * reset_layer_grads(conv_layer);
+ */
 void reset_layer_grads(Layer* layer);
 
-// Define function to compute the output shape
+/*
+ * Computes the output shape of the given layer based on its input shape and parameters.
+ *
+ * Parameters:
+ * - layer A pointer to the Layer struct.
+ *
+ * Usage example:
+ *
+ * compute_output_shape(conv_layer);
+ * Dimensions output_shape = conv_layer->output_shape;
+ */
 void compute_output_shape(Layer* layer);
 
-// Define function to delete a layer
+/*
+ * Deletes the given layer, freeing the memory allocated for its weights and biases.
+ *
+ * Parameters:
+ * - layer: A pointer to the Layer struct to be deleted.
+ *
+ * Usage example:
+ *
+ * delete_layer(conv_layer);
+ */
 void delete_layer(Layer* layer);
 
 #endif /* LAYER_H */

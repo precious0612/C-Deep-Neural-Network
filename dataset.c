@@ -1,4 +1,4 @@
-/* input/dataset.c */
+/* dataset.c */
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -6,8 +6,8 @@
 int main() {
     // Load dataset from JSON file
     Dimensions input_dimensions = {28, 28, 3};
-    create_dataset_json_file("/Users/precious/Design_Neural_Network/dataset example/test_data_and_val", 1, 0.0f);
-    Dataset* dataset = load_dataset_from_json("/Users/precious/Design_Neural_Network/dataset example/test_data_and_val/dataset.json", input_dimensions, FLOAT32, 1);
+    create_dataset_json_file("dataset example/test_data_and_val", 1, 0.0f);
+    Dataset* dataset = load_dataset_from_json("dataset example/test_data_and_val/dataset.json", input_dimensions, FLOAT32, 1);
     if (dataset == NULL) {
         printf("Error loading dataset\n");
         return 1;

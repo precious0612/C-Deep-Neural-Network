@@ -109,6 +109,33 @@ RMSpropOptimizer* init_rmsprop(float learning_rate, float rho, float epsilon, in
     return rmsprop;
 }
 
+// Create an optimizer based on the specified type
+Optimizer* create_optimizer(char* optimizer_type, float learning_rate, int num) {
+    Optimizer* optimizer = (Optimizer*)malloc(sizeof(Optimizer));
+    int* num_weights = malloc(1 * sizeof(int));
+    num_weights[0] = num;
+    if (optimizer == NULL) {
+        fprintf(stderr, "Error: Unable to allocate memory for optimizer\n");
+        exit(1);
+    }
+
+    if (strcmp(optimizer_type, "SGD") == 0) {
+        optimizer->type = SGD;
+        optimizer->optimizer.sgd = init_sgd(learning_rate, 0.0f, num_weights, 1);
+    } else if (strcmp(optimizer_type, "Adam") == 0) {
+        optimizer->type = ADAM;
+        optimizer->optimizer.adam = init_adam(learning_rate, 0.9f, 0.999f, 1e-8f, num_weights, 1);
+    } else if (strcmp(optimizer_type, "RMSprop") == 0) {
+        optimizer->type = RMSPROP;
+        optimizer->optimizer.rmsprop = init_rmsprop(learning_rate, 0.9f, 1e-8f, num_weights, 1);
+    } else {
+        fprintf(stderr, "Error: Invalid optimizer type\n");
+        exit(1);
+    }
+
+    return optimizer;
+}
+
 void delete_optimizer(Optimizer* optimizer, int num_layers) {
     SGDOptimizer* sgd_optimizer;
     AdamOptimizer* adam_optimizer;
