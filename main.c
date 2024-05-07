@@ -3,18 +3,50 @@
 #include "CNN.h"
 #include "dataset.h"
 
+// #include "CNN.c"
+// #include "model/model.c"
+// #include "model/layer/layer.c"
+// #include "optimizer/optimizer.c"
+// #include "dataset.c"
+// #include "input/data.c"
+// #include "utils/tensor.c"
+// #include "utils/train.c"
+// #include "utils/memory.c"
+// #include "utils/loss.c"
+// #include "utils/metric.c"
+// #include "utils/optim.c"
+// #include "utils/tools.c"
+// #include "utils/compute/convolution.c"
+// #include "utils/compute/pooling.c"
+// #include "utils/compute/fully_connected.c"
+// #include "utils/compute/dropout.c"
+// #include "utils/compute/flatten.c"
+// #include "utils/compute/activation.c"
+// #include "utils/rand.c"
+
 int main() {
-    // Load dataset from JSON file
-    Dimensions input_dimensions = {28, 28, 3};
-    create_dataset_json_file("dataset example/test_data_and_val", 1, 0.0f);
-    Dataset* dataset = load_dataset_from_json("dataset example/test_data_and_val/dataset.json", input_dimensions, FLOAT32, 1);
+    // // Load dataset
+    // Dimensions input_dimensions = {28, 28, 1};
+
+    // // Load dataset from json file
+    // create_dataset_json_file("dataset example/test_data_and_val", 1, 0.0f);
+    // Dataset* dataset = load_dataset_from_json("dataset example/test_data_and_val/dataset.json", input_dimensions, FLOAT32, 1);
+
+    // Or Load MNIST dataset directly
+    const char* train_images_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-images-idx3-ubyte.gz";
+    const char* train_labels_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-labels-idx1-ubyte.gz";
+    const char* test_images_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/t10k-images-idx3-ubyte.gz";
+    const char* test_labels_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/t10k-labels-idx1-ubyte.gz";
+
+    Dataset* dataset = load_mnist_dataset(train_images_path, train_labels_path,
+                                           test_images_path, test_labels_path, FLOAT32);
     if (dataset == NULL) {
         printf("Error loading dataset\n");
         return 1;
     }
 
     // Split dataset into batches
-    dataset = split_dataset_into_batches(dataset, 2);
+    dataset = split_dataset_into_batches(dataset, 1875);
     if (dataset == NULL) {
         printf("Error splitting dataset into batches\n");
         free_dataset(dataset);
@@ -22,7 +54,7 @@ int main() {
     }
 
     // Create a new model
-    Model* model = create(28, 28, 3, 1, 1, 10);
+    Model* model = create(28, 28, 1, 1, 1, 10);
     if (model == NULL) {
         printf("Error creating model\n");
         free_dataset(dataset);
@@ -35,8 +67,8 @@ int main() {
     add_convolutional_layer(model, 64, 3, 1, 1, "relu");
     add_max_pooling_layer(model, 2, 2);
     add_flatten_layer(model);
-    add_fully_connected_layer(model, 128, "relu");
-    add_dropout_layer(model, 0.5f);
+    add_fully_connected_layer(model, 64, "relu");
+    // add_dropout_layer(model, 0.5f);
     add_fully_connected_layer(model, 10, "softmax");
 
     // Compile the model

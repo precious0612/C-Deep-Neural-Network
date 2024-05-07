@@ -134,7 +134,7 @@ void create_dataset_json_file(const char* folder_path, int include_val_dataset, 
  * It modifies the original dataset to link the batches together.
  *
  * Parameters:
- * - dataset: Pointer to the Dataset struct representing the original dataset.
+ * - original_dataset: Pointer to the Dataset struct representing the original dataset.
  * - num_batches: Number of batches to create.
  *
  * Returns:
@@ -152,7 +152,7 @@ void create_dataset_json_file(const char* folder_path, int include_val_dataset, 
  *     // Handle error
  * }
  */
-Dataset* split_dataset_into_batches(Dataset* dataset, int num_batches);
+Dataset* split_dataset_into_batches(Dataset* original_dataset, int num_batches);
 
 /* 
  * Function to split a dataset into multiple batches. (No recommend to use this function directly)
@@ -183,5 +183,14 @@ Dataset** create_batches(const Dataset* dataset, int num_batches);
 
 // Function to free memory allocated for dataset
 void free_dataset(Dataset* dataset);
+
+Dataset* load_mnist_dataset(const char* train_images_path, const char* train_labels_path,
+                             const char* test_images_path, const char* test_labels_path,
+                             DataType data_type);
+int** load_mnist_images_int(const char* file_path, int* num_images);
+float** load_mnist_images_float(const char* file_path, int* num_images);
+uint8_t* load_mnist_labels(const char* file_path, int* num_labels);
+void free_mnist_images(void** images, int num_images, DataType data_type);
+void free_mnist_images_int(int** images, int num_images);
 
 #endif /* DATASET_H */

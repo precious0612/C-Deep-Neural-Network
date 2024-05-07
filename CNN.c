@@ -267,7 +267,15 @@ void compile(Model* model, ModelConfig config) {
 }
 
 void train(Model* model, Dataset* dataset, int epochs) {
-    train_model(model, dataset, epochs);
+    char continue_training;
+    printf("Do you want to continue training? (y/n): ");
+    scanf(" %c", &continue_training);
+
+    if (continue_training == 'y' || continue_training == 'Y') {
+        train_model(model, dataset, epochs);
+    } else {
+        printf("Training terminated.\n");
+    }
 }
 
 float evaluate(Model* model, Dataset* dataset) {

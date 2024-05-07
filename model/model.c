@@ -7,6 +7,9 @@
 #include "model.h"
 #include "layer/layer.h"
 
+#define MAX_BATCH_PRINT 100
+#define PRINT_INTERVAL(total_batches) ((total_batches) <= MAX_BATCH_PRINT ? 1 : MAX_BATCH_PRINT)
+
 Model* create_model(Dimensions input, Dimensions output) {
     Model* model = (Model*)malloc(sizeof(Model));
     model->input = input;
@@ -260,8 +263,20 @@ void reset_model_grads(Model* model) {
 void train_model(Model* model, Dataset* dataset, int num_epochs) {
     for (int epoch = 0; epoch < num_epochs; epoch++) {
         Dataset* batch = dataset;
+        int batch_count = 0;
+        int total_batches = 0;
+
+        // Calculate the total number of batches
         while (batch != NULL) {
-            int batch_num = 0;
+            total_batches++;
+            batch = batch->next_batch;
+        }
+
+        int print_interval = PRINT_INTERVAL(total_batches);
+
+        batch = dataset;
+        while (batch != NULL) {
+            int batch_num = batch_count++;
             float**** batch_inputs = (float****)malloc(sizeof(float***) * batch->batch_size);
             float**** batch_outputs;
             int* batch_labels = batch->labels;
@@ -298,13 +313,15 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
             update_model_weights(model);
             // reset_model_grads(model);  // reset operation has been finished at the beginning of the backward pass in each layer
 
-            // Print progress
-            printf("Epoch %d, Batch %d, DataNum %d\n", epoch + 1, batch_num, batch->num_images);
+            if (total_batches <= 100 || (batch_num + 1) % print_interval == 0 || batch_num == total_batches - 1) {
+                // Print progress
+                printf("Epoch %d, Batch %d/%d, DataNum %d\n", epoch + 1, batch_num + 1, total_batches, batch->num_images);
 
-            // Print loss and accuracy for the batch
-            float loss = compute_loss_batch(batch_outputs, batch_labels, model->loss_fn, batch->batch_size, model->output.channels);
-            float accuracy = compute_accuracy(batch_outputs, batch_labels, batch->batch_size, model->output.channels);
-            printf("Epoch %d, Batch Loss: %.6f, Batch Accuracy: %.2f%%\n", epoch + 1, loss, accuracy * 100.0f);
+                // Print loss and accuracy for the batch
+                float loss = compute_loss_batch(batch_outputs, batch_labels, model->loss_fn, batch->batch_size, model->output.channels);
+                float accuracy = compute_accuracy(batch_outputs, batch_labels, batch->batch_size, model->output.channels);
+                printf("Epoch %d, Batch Loss: %.6f, Batch Accuracy: %.2f%%\n", epoch + 1, loss, accuracy * 100.0f);
+            }
 
             // Free the allocated memory for batch_outputs and batch_output_grads
             for (int i = 0; i < batch->batch_size; i++) {
@@ -316,10 +333,14 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
             free(batch_outputs);
             free(batch_output_grads);
 
+            // Print progress bar for the current epoch
+            float epoch_progress = (float)(batch_count) / total_batches;
+            print_progress_bar(epoch_progress);
+
             batch = batch->next_batch;
         }
         // Print progress
-        printf("Epoch %d completed.\n", epoch + 1);
+        printf("\nEpoch %d completed.\n", epoch + 1);
 
         // Evaluate the model on the validation dataset
         if (dataset->val_dataset != NULL) {
@@ -334,23 +355,35 @@ float evaluate_model(Model* model, Dataset* dataset) {
     int total_samples = 0;
 
     Dataset* batch = dataset;
+    int batch_count = 0;
+    int total_batches = 0;
+
+    // Calculate the total number of batches
     while (batch != NULL) {
+        total_batches++;
+        batch = batch->next_batch;
+    }
+
+    batch = dataset;
+    while (batch != NULL) {
+        printf("Evaluating Batch %d/%d\n", batch_count + 1, total_batches);
+
         for (int i = 0; i < batch->num_images; i++) {
             // preprocess_input(batch->images[i], model->input);
             // float*** output = allocate_output_tensor(model->output);
             float*** output;
 
             switch (batch->data_type) {
-                    case Int:
-                        output = forward_pass(model, batch->images[i]->int_data);
-                        break;
-                    case FLOAT32:
-                        output = forward_pass(model, batch->images[i]->float32_data);
-                        break;
-                    default:
-                        fprintf(stderr, "Error: Invalid data type specified.\n");
-                        return 0.0f;
-                }
+                case Int:
+                    output = forward_pass(model, batch->images[i]->int_data);
+                    break;
+                case FLOAT32:
+                    output = forward_pass(model, batch->images[i]->float32_data);
+                    break;
+                default:
+                    fprintf(stderr, "Error: Invalid data type specified.\n");
+                    return 0.0f;
+            }
 
             int prediction = get_prediction(output, model->metric_name, model->output.channels);
             if (prediction == batch->labels[i]) {
@@ -360,9 +393,16 @@ float evaluate_model(Model* model, Dataset* dataset) {
 
             free_tensor(output, model->output);
         }
+
+        // Print progress bar for the current batch
+        float batch_progress = (float)(batch_count + 1) / total_batches;
+        print_progress_bar(batch_progress);
+
+        batch_count++;
         batch = batch->next_batch;
     }
 
+    printf("\n");
     return (float)correct_predictions / (float)total_samples;
 }
 
