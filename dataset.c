@@ -443,6 +443,7 @@ Dataset* split_dataset_into_batches(Dataset* original_dataset, int num_batches) 
     // Link the batches together
     for (int i = 0; i < num_batches - 1; i++) {
         batches[i]->next_batch = batches[i + 1];
+        batches[i]->val_dataset = original_dataset->val_dataset;
     }
     batches[num_batches - 1]->next_batch = NULL;
 
@@ -470,10 +471,10 @@ void free_dataset(Dataset* dataset) {
             free(dataset->labels);
         }
 
-        // Free dataset name
-        if (dataset->name != NULL) {
-            free(dataset->name);
-        }
+        // // Free dataset name
+        // if (dataset->name != NULL) {
+        //     free(dataset->name);
+        // }
         free(dataset);
         dataset = next;
     

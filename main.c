@@ -62,21 +62,21 @@ int main() {
     }
 
     // Add layers to the model
-    add_convolutional_layer(model, 32, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 3, 3, 1, 1, "relu");
     add_max_pooling_layer(model, 2, 2);
-    add_convolutional_layer(model, 64, 3, 1, 1, "relu");
-    add_max_pooling_layer(model, 2, 2);
+    // add_convolutional_layer(model, 64, 3, 1, 1, "relu");
+    // add_max_pooling_layer(model, 2, 2);
     add_flatten_layer(model);
-    add_fully_connected_layer(model, 64, "relu");
+    add_fully_connected_layer(model, 16, "relu");
     // add_dropout_layer(model, 0.5f);
     add_fully_connected_layer(model, 10, "softmax");
 
     // Compile the model
-    ModelConfig config = {"Adam", 0.001f, "categorical_crossentropy", "accuracy"};
+    ModelConfig config = {"Adam", 0.0003f, "categorical_crossentropy", "accuracy"};
     compile(model, config);
 
     // Train the model
-    train(model, dataset, 10);
+    train(model, dataset, 3);
 
     // Evaluate the model
     float accuracy = evaluate(model, dataset->val_dataset);

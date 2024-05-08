@@ -315,7 +315,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
 
             if (total_batches <= 100 || (batch_num + 1) % print_interval == 0 || batch_num == total_batches - 1) {
                 // Print progress
-                printf("Epoch %d, Batch %d/%d, DataNum %d\n", epoch + 1, batch_num + 1, total_batches, batch->num_images);
+                printf("\nEpoch %d, Batch %d/%d, DataNum %d\n", epoch + 1, batch_num + 1, total_batches, batch->num_images);
 
                 // Print loss and accuracy for the batch
                 float loss = compute_loss_batch(batch_outputs, batch_labels, model->loss_fn, batch->batch_size, model->output.channels);
@@ -345,7 +345,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
         // Evaluate the model on the validation dataset
         if (dataset->val_dataset != NULL) {
             float val_accuracy = evaluate_model(model, dataset->val_dataset);
-            printf("Validation Accuracy: %.2f%%\n", val_accuracy * 100.0f);
+            printf("\nValidation Accuracy: %.2f%%\n", val_accuracy * 100.0f);
         }
     }
 }
