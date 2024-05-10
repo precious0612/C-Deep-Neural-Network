@@ -83,9 +83,9 @@ void softmax_backward(float*** input, float*** output_grad, float*** input_grad,
  * const char* activation = "relu";
  * float*** input_data = ...; // Load or generate input data
  * Dimensions input_dim = {32, 32, 3};
- * float*** output_data = apply_activation(activation, input_data, input_dim);
+ * float*** output_data = forward_activation(activation, input_data, input_dim);
  */
-float*** apply_activation(const char* activation, float*** input, Dimensions input_shape);
+float*** forward_activation(const char* activation, float*** input, Dimensions input_shape);
 
 /*
  * Computes the gradients of the input data with respect to the loss for the specified activation function.
@@ -104,8 +104,8 @@ float*** apply_activation(const char* activation, float*** input, Dimensions inp
  * float*** output_grad = ...; // Compute or load output gradients
  * Dimensions input_dim = {32, 32, 3};
  * float*** input_grad = allocate_3d_array(input_dim);
- * apply_activation_backward(activation, input_data, output_grad, input_grad, input_dim);
+ * backward_activation(activation, input_data, output_grad, input_grad, input_dim);
  */
-void apply_activation_backward(const char* activation, float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape);
+void backward_activation(const char* activation, float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape);
 
 #endif // /* ACTIVATION_H */ 

@@ -116,7 +116,7 @@ float*** layer_forward_pass(Layer* layer, float*** input) {
                 break;
             }
             // Apply activation function (e.g., ReLU, sigmoid, tanh, etc.)
-            output = apply_activation(layer->params.conv_params.activation,
+            output = forward_activation(layer->params.conv_params.activation,
                                       output, layer->output_shape);
             break;
         case POOLING:
@@ -134,14 +134,14 @@ float*** layer_forward_pass(Layer* layer, float*** input) {
                 break;
             }
             // Apply activation function (e.g., ReLU, sigmoid, tanh, etc.)
-            output = apply_activation(layer->params.fc_params.activation,
+            output = forward_activation(layer->params.fc_params.activation,
                                       output, layer->output_shape);
             break;
         case DROPOUT:
             output = dropout_forward(input, layer->input_shape, layer->params.dropout_params.dropout_rate);
             break;
         case ACTIVATION:
-            output = apply_activation(layer->params.activation_params.activation,
+            output = forward_activation(layer->params.activation_params.activation,
                                       input, layer->input_shape);
             break;
         case FLATTEN:
@@ -162,7 +162,7 @@ void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, flo
     switch (layer->type) {
         case CONVOLUTIONAL:
             if (not_empty_string(layer->params.conv_params.activation)) {
-                apply_activation_backward(layer->params.conv_params.activation,
+                backward_activation(layer->params.conv_params.activation,
                                           input, output_grad, output_grad,
                                           layer->output_shape);
             }
@@ -181,7 +181,7 @@ void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, flo
             break;
         case FULLY_CONNECTED:
             if (not_empty_string(layer->params.fc_params.activation)) {
-                apply_activation_backward(layer->params.fc_params.activation,
+                backward_activation(layer->params.fc_params.activation,
                                           input, output_grad, output_grad,
                                           layer->output_shape);
             }
@@ -200,12 +200,12 @@ void layer_backward_pass(Layer* layer, float*** input, float*** output_grad, flo
             dropout_backward(input, output_grad, input_grad, layer->input_shape);
             break;
         case ACTIVATION:
-            apply_activation_backward(layer->params.activation_params.activation,
+            backward_activation(layer->params.activation_params.activation,
                                       input, output_grad, input_grad,
                                       layer->input_shape);
             break;
         case FLATTEN:
-            unflatten(input_grad[0][0], input_grad, layer->input_shape);
+            unflatten(output_grad[0][0], input_grad, layer->input_shape);
             break;
         default:
             fprintf(stderr, "Error: Unknown layer type.\n");

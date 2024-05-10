@@ -313,8 +313,8 @@ int main() {
 - [`utils/compute/activation.h`](utils/compute/activation.h):
   Provides implementations for various activation functions used in neural networks.
   - Defines functions for forward and backward propagation through different activation functions, including ReLU, Sigmoid, Tanh, Max, and Softmax.
-  - Includes a unified interface for applying activation functions during the forward pass (`apply_activation`).
-  - Includes a unified interface for computing gradients during the backward pass (`apply_activation_backward`).
+  - Includes a unified interface for applying activation functions during the forward pass (`forward_activation`).
+  - Includes a unified interface for computing gradients during the backward pass (`backward_activation`).
 
 - [`utils/compute/activation.c`](utils/compute/activation.c):
   Provides implementations for the functions defined in `utils/compute/activation.h`.
@@ -499,8 +499,8 @@ int main() {
 - [`utils/compute/activation.h`](utils/compute/activation.h):
   提供神经网络中常用的各种激活函数的实现。
   - 定义了不同激活函数(如ReLU、Sigmoid、Tanh、Max和Softmax)的前向和反向传播函数。
-  - 包含了在前向传播时应用激活函数的统一接口(`apply_activation`)。
-  - 包含了在反向传播时计算梯度的统一接口(`apply_activation_backward`)。
+  - 包含了在前向传播时应用激活函数的统一接口(`forward_activation`)。
+  - 包含了在反向传播时计算梯度的统一接口(`backward_activation`)。
 
 - [`utils/compute/activation.c`](utils/compute/activation.c):
   提供`utils/compute/activation.h`中定义的函数的实现。

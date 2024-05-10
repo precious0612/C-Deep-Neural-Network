@@ -244,8 +244,10 @@ void backward_pass(Model* model, float*** input, float*** output_grad) {
     for (int i = model->num_layers - 1; i >= 0; i--) {
         float*** layer_input_grad = allocate_grad_tensor(model->layers[i]->input_shape);
         layer_backward_pass(model->layers[i], input, temp_input_grad, layer_input_grad);
+        free_tensor(temp_input_grad, model->layers[i]->output_shape);
         temp_input_grad = layer_input_grad;
     }
+    free_tensor(temp_input_grad, model->input);
 
     // // Update weights and biases for all layers
     // for (int i = 0; i < model->num_layers; i++) {
@@ -347,7 +349,6 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
             // Free the allocated memory for batch_outputs and batch_output_grads
             for (int i = 0; i < batch->batch_size; i++) {
                 free_tensor(batch_outputs[i], model->output);
-                free_tensor(batch_output_grads[i], model->output);
             }
 
             free(batch_inputs);
