@@ -635,6 +635,9 @@ int main() {
 - [json-c](https://github.com/json-c/json-c): Library for parsing JSON data. 
   License: [MIT License](https://opensource.org/licenses/MIT)
 
+- [hdf5](https://www.hdfgroup.org/solutions/hdf5/): Library for reading and writing HDF5 files.
+  License: [HDF5 License](https://github.com/HDFGroup/hdf5?tab=License-1-ov-file#)
+
 - [libpng](https://github.com/glennrp/libpng): 用于读取和写入 PNG 图像文件的库。
   许可证: [PNG Reference Library License](http://www.libpng.org/pub/png/src/libpng-LICENSE.txt)
 
@@ -643,3 +646,6 @@ int main() {
 
 - [json-c](https://github.com/json-c/json-c): 用于解析 JSON 数据的库。
   许可证: [MIT License](https://opensource.org/licenses/MIT)
+
+- [hdf5](https://www.hdfgroup.org/solutions/hdf5/): 用于读取和写入 HDF5 文件的库。
+  许可证: [HDF5 License](https://github.com/HDFGroup/hdf5?tab=License-1-ov-file#)
