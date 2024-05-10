@@ -3,34 +3,44 @@
 #include "CNN.h"
 #include "dataset.h"
 
-// #include "CNN.c"
-// #include "model/model.c"
-// #include "model/layer/layer.c"
-// #include "optimizer/optimizer.c"
-// #include "dataset.c"
-// #include "input/data.c"
-// #include "utils/tensor.c"
-// #include "utils/train.c"
-// #include "utils/memory.c"
-// #include "utils/loss.c"
-// #include "utils/metric.c"
-// #include "utils/optim.c"
-// #include "utils/tools.c"
-// #include "utils/compute/convolution.c"
-// #include "utils/compute/pooling.c"
-// #include "utils/compute/fully_connected.c"
-// #include "utils/compute/dropout.c"
-// #include "utils/compute/flatten.c"
-// #include "utils/compute/activation.c"
-// #include "utils/rand.c"
+#include "CNN.c"
+#include "model/model.c"
+#include "model/layer/layer.c"
+#include "optimizer/optimizer.c"
+#include "dataset.c"
+#include "input/data.c"
+#include "utils/tensor.c"
+#include "utils/train.c"
+#include "utils/memory.c"
+#include "utils/loss.c"
+#include "utils/metric.c"
+#include "utils/optim.c"
+#include "utils/tools.c"
+#include "utils/compute/convolution.c"
+#include "utils/compute/pooling.c"
+#include "utils/compute/fully_connected.c"
+#include "utils/compute/dropout.c"
+#include "utils/compute/flatten.c"
+#include "utils/compute/activation.c"
+#include "utils/rand.c"
 
 int main() {
     // // Load dataset
     // Dimensions input_dimensions = {28, 28, 1};
 
-    // // Load dataset from json file
+    // Load dataset from json file
     // create_dataset_json_file("dataset example/test_data_and_val", 1, 0.0f);
     // Dataset* dataset = load_dataset_from_json("dataset example/test_data_and_val/dataset.json", input_dimensions, FLOAT32, 1);
+
+    // Load pre-trained model
+    ModelConfig vgg16_config = {"Adam", 0.0003f, "categorical_crossentropy", "accuracy"};
+    Model *vgg16 = load_vgg16("/Users/precious/Design_Neural_Network/VGG16 weights.h5", 1, 1000, vgg16_config);
+    if (vgg16 == NULL) {
+        printf("Error loading VGG16 model\n");
+        return 1;
+    }
+    save_weights(vgg16, "vgg16_weights.h5");
+    free_model(vgg16);
 
     // Or Load MNIST dataset directly
     const char* train_images_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-images-idx3-ubyte.gz";

@@ -50,7 +50,7 @@ typedef struct Dataset {
  * Parameters:
  * - file_path: Path to the JSON file containing dataset information.
  * - input_dimensions: Dimensions of the input data (width, height, channels).
- * - data_type: Type of data in the dataset (Int or FLOAT32).
+ * - data_type: Type of data in the dataset (INT or FLOAT32).
  * - include_val_dataset: 1 if the dataset contains a val folder include validation dataset, 0 otherwise.
  *
  * Returns:

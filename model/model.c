@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h> // for malloc and free
 #include <string.h> // for strcmp
+#include <hdf5.h>
 
 #include "model.h"
 #include "layer/layer.h"
@@ -217,6 +218,26 @@ float*** forward_pass(Model* model, float*** input) {
     return output;
 }
 
+float*** forward_pass_for_evaluate(Model* model, float*** input) {
+    float*** output;
+
+    if (model->num_layers == 0) {
+        fprintf(stderr, "Error: Model does not have any layers.\n");
+        return copy_3d_array(input, model->input);
+    } else {
+        output = layer_forward_pass(model->layers[0], input);
+    }
+
+    for (int i = 1; i < model->num_layers; i++) {
+        if (model->layers[i]->type == DROPOUT) {
+            continue;
+        }
+        output = layer_forward_pass(model->layers[i], output);
+    }
+
+    return output;
+}
+
 
 void backward_pass(Model* model, float*** input, float*** output_grad) {
     float*** temp_input_grad = output_grad;
@@ -283,7 +304,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
 
             for (int i = 0; i < batch->batch_size; i++) {
                 switch (batch->data_type) {
-                    case Int:
+                    case INT:
                         batch_inputs[i] = batch->images[i]->int_data;
                         break;
                     case FLOAT32:
@@ -374,11 +395,11 @@ float evaluate_model(Model* model, Dataset* dataset) {
             float*** output;
 
             switch (batch->data_type) {
-                case Int:
-                    output = forward_pass(model, batch->images[i]->int_data);
+                case INT:
+                    output = forward_pass_for_evaluate(model, batch->images[i]->int_data);
                     break;
                 case FLOAT32:
-                    output = forward_pass(model, batch->images[i]->float32_data);
+                    output = forward_pass_for_evaluate(model, batch->images[i]->float32_data);
                     break;
                 default:
                     fprintf(stderr, "Error: Invalid data type specified.\n");
@@ -462,6 +483,175 @@ void print_model_info(Model* model) {
         }
         layer_num++;
     }
+}
+
+void save_model_weights(Model *model, const char *filename) {
+    hid_t file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (file_id < 0) {
+        fprintf(stderr, "Error creating HDF5 file: %s\n", filename);
+        return;
+    }
+
+    for (int i = 0; i < model->num_layers; i++) {
+        Layer *layer = model->layers[i];
+        char group_name[32];
+
+        switch (layer->type) {
+            case CONVOLUTIONAL:
+                sprintf(group_name, "/conv_%d", i);
+                break;
+            case FULLY_CONNECTED:
+                sprintf(group_name, "/fc_%d", i);
+                break;
+            // Add other layer types as needed
+            default:
+                sprintf(group_name, "/layer_%d", i);
+                break;
+        }
+
+        hid_t group_id = H5Gcreate(file_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+        switch (layer->type) {
+            case CONVOLUTIONAL:
+                // Save convolutional layer weights and biases
+                save_conv_weights(group_id, layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->input_shape.channels);
+                save_biases(group_id, layer->biases.biases, layer->params.conv_params.num_filters);
+                break;
+            case POOLING:
+                // Pooling layer does not have any weights or biases
+                break;
+            case FULLY_CONNECTED:
+                // Save fully connected layer weights and biases
+                save_fc_weights(group_id, layer->weights.fc_weights, layer->params.fc_params.num_neurons, layer->input_shape.width * layer->input_shape.height * layer->input_shape.channels);
+                save_biases(group_id, layer->biases.biases, layer->params.fc_params.num_neurons);
+                break;
+            // Add other layer types as needed
+            default:
+                break;
+        }
+
+        H5Gclose(group_id);
+    }
+
+    H5Fclose(file_id);
+}
+
+void load_model_weights(Model *model, const char *filename) {
+    hid_t file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (file_id < 0) {
+        fprintf(stderr, "Error opening HDF5 file: %s\n", filename);
+        return;
+    }
+
+    for (int i = 0; i < model->num_layers; i++) {
+        Layer *layer = model->layers[i];
+        char group_name[64];
+
+        switch (layer->type) {
+            case CONVOLUTIONAL:
+                sprintf(group_name, "/conv_%d", i);
+                break;
+            case FULLY_CONNECTED:
+                sprintf(group_name, "/fc_%d", i);
+                break;
+            // Add other layer types as needed
+            default:
+                // sprintf(group_name, "/layer_%d", i);
+                break;
+        }
+
+        hid_t group_id = H5Gopen(file_id, group_name, H5P_DEFAULT);
+        if (group_id < 0) { // Check if the group exists
+            fprintf(stderr, "Error opening HDF5 group: %s\n", group_name);
+            H5Fclose(file_id); // Close the file
+            return;
+        }
+
+        switch (layer->type) {
+            case CONVOLUTIONAL:
+                // Load convolutional layer weights and biases
+                load_conv_weights(group_id, &layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->input_shape.channels);
+                load_biases(group_id, &layer->biases.biases, layer->params.conv_params.num_filters);
+                break;
+            case POOLING:
+                // Pooling layer does not have any weights or biases
+                break;
+            case FULLY_CONNECTED:
+                // Load fully connected layer weights and biases
+                load_fc_weights(group_id, &layer->weights.fc_weights, layer->params.fc_params.num_neurons, layer->input_shape.width * layer->input_shape.height * layer->input_shape.channels);
+                load_biases(group_id, &layer->biases.biases, layer->params.fc_params.num_neurons);
+                break;
+            // Add other layer types as needed
+            default:
+                break;
+        }
+
+        H5Gclose(group_id);
+    }
+
+    H5Fclose(file_id);
+}
+
+void load_vgg16_weights(Model *model, const char *filename) {
+    hid_t file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (file_id < 0) {
+        fprintf(stderr, "Error opening HDF5 file: %s\n", filename);
+        return;
+    }
+
+    int conv_block_count = 1;
+    int fc_layer_count = 6;
+
+    for (int i = 0; i < model->num_layers; i++) {
+        Layer *layer = model->layers[i];
+        char group_name[9];
+
+        switch (layer->type) {
+            case CONVOLUTIONAL:
+                if (layer->output_shape.channels == 64) {
+                    sprintf(group_name, "/conv%d_%d", 1, conv_block_count);
+                } else if (layer->output_shape.channels == 128) {
+                    sprintf(group_name, "/conv%d_%d", 2, conv_block_count - 2);
+                } else if (layer->output_shape.channels == 256) {
+                    sprintf(group_name, "/conv%d_%d", 3, conv_block_count - 4);
+                } else if (layer->output_shape.channels == 512 && conv_block_count <= 10) {
+                    sprintf(group_name, "/conv%d_%d", 4, conv_block_count - 7);
+                } else if (layer->output_shape.channels == 512 && conv_block_count > 10) {
+                    sprintf(group_name, "/conv%d_%d", 5, conv_block_count - 10);
+                }
+                conv_block_count++;
+                break;
+            case FULLY_CONNECTED:
+                sprintf(group_name, "/fc%d", fc_layer_count++);
+                break;
+            default:
+                continue;
+        }
+
+        hid_t group_id = H5Gopen(file_id, group_name, H5P_DEFAULT);
+        if (group_id < 0) {
+            fprintf(stderr, "Error opening HDF5 group: %s\n", group_name);
+            H5Fclose(file_id);
+            return;
+        }
+
+        switch (layer->type) {
+            case CONVOLUTIONAL:
+                // Load convolutional layer weights and biases
+                load_conv_weights(group_id, &layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->input_shape.channels);
+                load_biases(group_id, &layer->biases.biases, layer->params.conv_params.num_filters);
+                break;
+            case FULLY_CONNECTED:
+                // Load fully connected layer weights and biases
+                load_fc_weights(group_id, &layer->weights.fc_weights, layer->params.fc_params.num_neurons, layer->input_shape.width * layer->input_shape.height * layer->input_shape.channels);
+                load_biases(group_id, &layer->biases.biases, layer->params.fc_params.num_neurons);
+                break;
+        }
+
+        H5Gclose(group_id);
+    }
+
+    H5Fclose(file_id);
 }
 
 void delete_model(Model* model) {

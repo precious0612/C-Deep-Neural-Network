@@ -266,6 +266,60 @@ void compile(Model* model, ModelConfig config) {
     compile_model(model, config.optimizer, config.learning_rate, config.loss_function, config.metric_name);
 }
 
+void save_weights(Model* model, const char* filename) {
+    save_model_weights(model, filename);
+}
+
+void load_weights(Model* model, const char* filename) {
+    load_model_weights(model, filename);
+}
+
+Model *load_vgg16(const char *weights_file, int load_pretrained, int num_classes, ModelConfig config) {
+    // Create a new model
+    Model *model = create(224, 224, 3, 1, 1, num_classes);
+
+    // Add layers to the model
+    add_convolutional_layer(model, 64, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 64, 3, 1, 1, "relu");
+    add_max_pooling_layer(model, 2, 2);
+
+    add_convolutional_layer(model, 128, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 128, 3, 1, 1, "relu");
+    add_max_pooling_layer(model, 2, 2);
+
+    add_convolutional_layer(model, 256, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 256, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 256, 3, 1, 1, "relu");
+    add_max_pooling_layer(model, 2, 2);
+
+    add_convolutional_layer(model, 512, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 512, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 512, 3, 1, 1, "relu");
+    add_max_pooling_layer(model, 2, 2);
+
+    add_convolutional_layer(model, 512, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 512, 3, 1, 1, "relu");
+    add_convolutional_layer(model, 512, 3, 1, 1, "relu");
+    add_max_pooling_layer(model, 2, 2);
+
+    add_flatten_layer(model);
+    add_fully_connected_layer(model, 4096, "relu");
+    add_dropout_layer(model, 0.5f);
+    add_fully_connected_layer(model, 4096, "relu");
+    add_dropout_layer(model, 0.5f);
+    add_fully_connected_layer(model, num_classes, "softmax");
+
+    // Compile the model
+    compile(model, config);
+
+    // 加载预训练权重（如果指定）
+    if (load_pretrained && weights_file != NULL) {
+        load_vgg16_weights(model, weights_file);
+    }
+
+    return model;
+}
+
 void train(Model* model, Dataset* dataset, int epochs) {
     char continue_training;
     printf("Do you want to continue training? (y/n): ");

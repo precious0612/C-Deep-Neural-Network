@@ -25,7 +25,7 @@ Designing the abstract data structure for a Convolutional Neural Network (CNN) A
 
 8. **Evaluation Metrics**: Define data structures for evaluation metrics (e.g., accuracy, precision, recall, F1-score) to assess the performance of the model.
 
-9. **API Interface**:
+9. **APInterface**:
     - Define the methods and functions that will be exposed by the API for building, training, and evaluating CNN models.
     - Ensure the API is user-friendly and intuitive, with clear documentation and error handling.
 

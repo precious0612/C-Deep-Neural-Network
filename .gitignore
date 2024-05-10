@@ -3,3 +3,5 @@
 /compile_commands.json
 /.VSCodeCounter
 /Papers
+/VGG16 weights.h5
+/vgg16_weights.h5

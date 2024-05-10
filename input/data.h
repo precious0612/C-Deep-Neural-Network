@@ -6,7 +6,7 @@
  *
  * The InputData union is used to store the input data in either integer or
  * float format, depending on the specified DataType. The available data types
- * are Int (integer) and FLOAT32 (32-bit floating-point).
+ * are INT (integer) and FLOAT32 (32-bit floating-point).
  *
  * The supported image formats include JPEG, PNG, GIF, TGA, BMP, PSD, HDR, and
  * a fallback format 'PIC' for other formats.
@@ -31,7 +31,7 @@
 
 // Define the data types supported by the library
 typedef enum {
-    Int,
+    INT,
     FLOAT32
 } DataType;
 

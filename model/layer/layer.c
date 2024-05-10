@@ -38,23 +38,23 @@ void initialize_layer(Layer* layer) {
                 int input_channels = layer->input_shape.channels;
 
                 // Allocate memory for weights and biases
-                layer->weights.conv_weights = malloc_4d_float_array(num_filters, filter_size, filter_size, input_channels);
+                layer->weights.conv_weights = malloc_4d_float_array(num_filters, input_channels, filter_size, filter_size);
                 layer->biases.biases = calloc(num_filters, sizeof(float));
 
                 // Initialize weights with random values (e.g., Xavier initialization)
                 float scale = sqrt(2.0 / (float)(filter_size * filter_size * input_channels));
                 for (int f = 0; f < num_filters; f++) {
-                    for (int h = 0; h < filter_size; h++) {
-                        for (int w = 0; w < filter_size; w++) {
-                            for (int c = 0; c < input_channels; c++) {
-                                layer->weights.conv_weights[f][h][w][c] = scale * rand_uniform(-1.0, 1.0);
+                    for (int c = 0; c < input_channels; c++) {
+                        for (int h = 0; h < filter_size; h++) {
+                            for (int w = 0; w < filter_size; w++) {
+                                layer->weights.conv_weights[f][c][h][w] = scale * rand_uniform(-1.0, 1.0);
                             }
                         }
                     }
                 }
 
                 // Allocate memory for weight gradients and bias gradients
-                layer->grads.conv_grads = malloc_4d_float_array(num_filters, filter_size, filter_size, input_channels);
+                layer->grads.conv_grads = malloc_4d_float_array(num_filters, input_channels, filter_size, filter_size);
                 layer->biases.bias_grads = calloc(num_filters, sizeof(float));
             }
             break;
@@ -328,8 +328,8 @@ void compute_output_shape(Layer* layer) {
 void delete_layer(Layer* layer) {
     switch (layer->type) {
         case CONVOLUTIONAL:
-            free_4d_float_array(layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->params.conv_params.filter_size);
-            free_4d_float_array(layer->grads.conv_grads, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->params.conv_params.filter_size);
+            free_4d_float_array(layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->input_shape.channels, layer->params.conv_params.filter_size);
+            free_4d_float_array(layer->grads.conv_grads, layer->params.conv_params.num_filters, layer->input_shape.channels, layer->params.conv_params.filter_size);
             free(layer->biases.biases);
             free(layer->biases.bias_grads);
             break;

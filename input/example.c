@@ -11,7 +11,7 @@ int main() {
     new_dimensions.width = 100;
     new_dimensions.height = 100;
     new_dimensions.channels = 3;
-    InputData *image_data = load_input_data_from_image(filename, &new_dimensions, Int);
+    InputData *image_data = load_input_data_from_image(filename, &new_dimensions, INT);
     if (image_data == NULL) {
         fprintf(stderr, "Error: Failed to load the image.\n");
         return 1;
@@ -26,7 +26,7 @@ int main() {
     }
 
     // Free the memory allocated for image data
-    free_image_data(image_data, new_dimensions, Int);
+    free_image_data(image_data, new_dimensions, INT);
 
     printf("Image processing completed successfully.\n");
     return 0;

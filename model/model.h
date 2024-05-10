@@ -323,6 +323,47 @@ void train_model(Model* model, Dataset* dataset, int num_epochs);
 float evaluate_model(Model* model, Dataset* dataset);
 
 /*
+ * Saves the weights and biases of the CNN model to a file in HDF5 format.
+ *
+ * This function saves the weights and biases of all layers in the CNN model to a file
+ * in the HDF5 format, which is a widely used format for storing and transferring scientific
+ * data. The weights and biases are organized in groups, with each group representing a layer
+ * in the model. The function can be used to save the model's state during or after training,
+ * allowing for later resumption or deployment of the trained model.
+ *
+ * Parameters:
+ * - model: A pointer to the Model struct representing the CNN model.
+ * - filename: A string containing the name of the file to save the model weights and biases to.
+ *
+ * Usage example:
+ *
+ * save_model_weights(model, "model_weights.h5");
+ */
+void save_model_weights(Model *model, const char *filename);
+
+/*
+ * Loads the weights and biases of the CNN model from a file in HDF5 format.
+ *
+ * This function loads the weights and biases of all layers in the CNN model from a file
+ * in the HDF5 format. The function assumes that the file was previously created using
+ * the `save_model_weights` function, and that the model architecture matches the one used
+ * when saving the weights and biases. The loaded weights and biases are assigned to the
+ * corresponding layers in the provided model, allowing for the restoration of a previously
+ * trained model or the initialization of a new model with pre-trained weights.
+ *
+ * Parameters:
+ * - model: A pointer to the Model struct representing the CNN model.
+ * - filename: A string containing the name of the file to load the model weights and biases from.
+ *
+ * Usage example:
+ *
+ * load_model_weights(model, "model_weights.h5");
+ */
+void load_model_weights(Model *model, const char *filename);
+
+void load_vgg16_weights(Model *model, const char *filename);
+
+/*
  * Frees the memory allocated for the CNN model, including its layers, weights,
  * and associated data structures.
  * 

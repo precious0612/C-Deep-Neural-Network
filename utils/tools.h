@@ -38,8 +38,16 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#include <hdf5.h>
+
 int is_empty_string(const char* str);
 int not_empty_string(const char* str);
 void print_progress_bar(float progress);
+void save_conv_weights(hid_t group_id, float ****weights, int num_filters, int filter_size, int channels);
+void save_fc_weights(hid_t group_id, float **weights, int num_neurons, int input_size);
+void save_biases(hid_t group_id, float *biases, int num_biases);
+void load_conv_weights(hid_t group_id, float *****weights, int num_filters, int filter_size, int channels);
+void load_fc_weights(hid_t group_id, float ***weights, int num_neurons, int input_size);
+void load_biases(hid_t group_id, float **biases, int num_biases);
 
 #endif /* TOOLS_H */

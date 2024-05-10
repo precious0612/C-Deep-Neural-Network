@@ -54,6 +54,12 @@ This API provides a high-level interface for model designers to easily define, c
 
 8. Use the `free_model` function to release the memory allocated for the model.
 
+9. Use the `save_weights` function to save the model weights to an HDF5 format file.
+
+10. Use the `load_weights` function to load model weights from an HDF5 format file.
+
+11. Use the `load_vgg16` function to load a pre-trained VGG16 CNN model.
+
 For detailed usage instructions and function documentation, please refer to [`CNN.h`](CNN.h).
 
 ### 中文
@@ -84,6 +90,12 @@ For detailed usage instructions and function documentation, please refer to [`CN
 7. 使用 `save_model_to_json` 函数将模型配置和架构保存到 JSON 文件中。
 
 8. 使用 `free_model` 函数释放为模型分配的内存。
+
+9. 使用 `save_weights` 函数将模型权重保存到 HDF5 格式的文件中。
+
+10. 使用 `load_weights` 函数从 HDF5 格式的文件中加载模型权重。
+
+11. 使用 `load_vgg16` 函数加载预训练的 VGG16 CNN 模型。
 
 有关详细的使用说明和函数文档，请参阅 [`CNN.h`](CNN.h)。
 

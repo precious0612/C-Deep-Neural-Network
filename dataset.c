@@ -11,7 +11,7 @@
 #include <json-c/json.h>
 
 // Define the maximum number of images per batch
-#define MAX_IMAGES_PER_BATCH 100
+#define MAX_IMAGES_PER_BATCH 1000
 #define MNIST_IMAGE_SIZE 28 * 28
 #define MNIST_NUM_CLASSES 10
 
@@ -504,7 +504,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     // Load training data
     int num_train_images;
     void** train_images = NULL;
-    if (data_type == Int) {
+    if (data_type == INT) {
         train_images = (void**)load_mnist_images_int(train_images_path, &num_train_images);
     } else {
         train_images = (void**)load_mnist_images_float(train_images_path, &num_train_images);
@@ -530,7 +530,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     printf("Loading training data: ");
     for (int i = 0; i < num_train_images; i++) {
         dataset->images[i] = (InputData*)malloc(sizeof(InputData));
-        if (data_type == Int) {
+        if (data_type == INT) {
             dataset->images[i]->int_data = (int***)malloc(28 * sizeof(int**));
             for (int j = 0; j < 28; j++) {
                 dataset->images[i]->int_data[j] = (int**)malloc(28 * sizeof(int*));
@@ -559,7 +559,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     // Load test data
     int num_test_images;
     void** test_images = NULL;
-    if (data_type == Int) {
+    if (data_type == INT) {
         test_images = (void**)load_mnist_images_int(test_images_path, &num_test_images);
     } else {
         test_images = (void**)load_mnist_images_float(test_images_path, &num_test_images);
@@ -591,7 +591,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     printf("Loading test data: ");
     for (int i = 0; i < num_test_images; i++) {
         dataset->val_dataset->images[i] = (InputData*)malloc(sizeof(InputData));
-        if (data_type == Int) {
+        if (data_type == INT) {
             dataset->val_dataset->images[i]->int_data = (int***)malloc(28 * sizeof(int**));
             for (int j = 0; j < 28; j++) {
                 dataset->val_dataset->images[i]->int_data[j] = (int**)malloc(28 * sizeof(int*));
@@ -881,7 +881,7 @@ void free_mnist_images(void** images, int num_images, DataType data_type) {
         return;
     }
 
-    if (data_type == Int) {
+    if (data_type == INT) {
         free_mnist_images_int((int**)images, num_images);
     } else {
         for (int i = 0; i < num_images; i++) {

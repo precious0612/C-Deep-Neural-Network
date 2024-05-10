@@ -227,4 +227,6 @@ void compute_output_shape(Layer* layer);
  */
 void delete_layer(Layer* layer);
 
+void save_conv_weights(hid_t group_id, float ****weights, int num_filters, int filter_size, int channels);
+
 #endif /* LAYER_H */

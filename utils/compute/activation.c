@@ -155,20 +155,21 @@ void softmax_backward(float*** input, float*** output_grad, float*** input_grad,
 }
 
 float*** apply_activation(const char* activation, float*** input, Dimensions input_shape) {
+    float*** output = NULL;
     if (strcmp(activation, "relu") == 0 || strcmp(activation, "ReLU") == 0) {
-        return relu_forward(input, input_shape);
+        output = relu_forward(input, input_shape);
     } else if (strcmp(activation, "sigmoid") == 0) {
-        return sigmoid_forward(input, input_shape);
+        output = sigmoid_forward(input, input_shape);
     } else if (strcmp(activation, "tanh") == 0) {
-        return tanh_forward(input, input_shape);
+        output = tanh_forward(input, input_shape);
     } else if (strcmp(activation, "max") == 0) {
-        return max_forward(input, input_shape);
+        output = max_forward(input, input_shape);
     } else if (strcmp(activation, "softmax") == 0) {
-        return softmax_forward(input, input_shape);
+        output = softmax_forward(input, input_shape);
     } else {
         fprintf(stderr, "Error: Unknown activation function %s.\n", activation);
-        return NULL;
     }
+    return output;
 }
 
 void apply_activation_backward(const char* activation, float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {

@@ -270,6 +270,69 @@ void add_tanh_layer(Model* model);
 void compile(Model* model, ModelConfig config);
 
 /*
+ * Saves the weights of the CNN model to a file in HDF5 format.
+ *
+ * This function saves the weights of all layers in the CNN model to a file in the HDF5 format.
+ * The weights are organized in groups, with each group representing a layer in the model.
+ * The function can be used to save the model's state during or after training,
+ * allowing for later resumption or deployment of the trained model.
+ *
+ * Parameters:
+ * - model: A pointer to the Model struct representing the CNN model.
+ * - filename: A string containing the name of the file to save the model weights to.
+ *
+ * Usage example:
+ *
+ * save_weights(model, "model_weights.h5");
+ */
+void save_weights(Model* model, const char* filename);
+
+/*
+ * Loads the weights of the CNN model from a file in HDF5 format.
+ *
+ * This function loads the weights of all layers in the CNN model from a file in the HDF5 format.
+ * The function assumes that the file was previously created using the `save_weights` function,
+ * and that the model architecture matches the one used when saving the weights.
+ * The loaded weights are assigned to the corresponding layers in the provided model,
+ * allowing for the restoration of a previously trained model or the initialization
+ * of a new model with pre-trained weights.
+ *
+ * Parameters:
+ * - model: A pointer to the Model struct representing the CNN model.
+ * - filename: A string containing the name of the file to load the model weights from.
+ *
+ * Usage example:
+ *
+ * load_weights(model, "model_weights.h5");
+ */
+void load_weights(Model* model, const char* filename);
+
+/*
+ * Loads the VGG16 CNN model with optional pre-trained weights.
+ *
+ * This function creates and compiles the VGG16 CNN model architecture.
+ * If the `load_pretrained` parameter is set to 1, and the `weights_file` is provided,
+ * the function will load the pre-trained weights from the specified file.
+ * Otherwise, the model will be initialized with random weights.
+ *
+ * Parameters:
+ * - weights_file: A string containing the path to the file with pre-trained weights.
+ *                 If NULL, the model will be initialized with random weights.
+ * - load_pretrained: An integer flag (0 or 1) indicating whether to load pre-trained weights.
+ * - num_classes: The number of output classes for the model.
+ * - config: A ModelConfig struct containing the configuration parameters for the model.
+ *
+ * Returns:
+ * - A pointer to the compiled Model struct representing the VGG16 model.
+ *
+ * Usage example:
+ *
+ * ModelConfig config = {"Adam", 0.001, "categorical_crossentropy", "accuracy"};
+ * Model* vgg16_model = load_vgg16("vgg16_weights.h5", 1, 1000, config);
+ */
+Model* load_vgg16(const char* weights_file, int load_pretrained, int num_classes, ModelConfig config);
+
+/*
  * Trains the model on the provided dataset.
  *
  * This function trains the model on the provided dataset for the specified number of epochs.

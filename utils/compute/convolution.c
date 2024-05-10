@@ -24,7 +24,7 @@ float*** conv_forward(float*** input, Dimensions input_shape, Dimensions output_
                             int in_y = out_y * stride + fy - padding;
                             int in_x = out_x * stride + fx - padding;
                             if (in_y >= 0 && in_y < input_shape.height && in_x >= 0 && in_x < input_shape.width) {
-                                sum += input[in_y][in_x][in_ch] * weights[out_ch][fy][fx][in_ch];
+                                sum += input[in_y][in_x][in_ch] * weights[out_ch][in_ch][fy][fx];
                             }
                         }
                     }
@@ -40,10 +40,10 @@ float*** conv_forward(float*** input, Dimensions input_shape, Dimensions output_
 void conv_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape, Dimensions output_shape, int num_filters, int filter_size, int stride, int padding, float**** weights, float**** weight_grads, float* bias_grads) {
     // Initialize weight and bias gradients to zero
     for (int f = 0; f < num_filters; f++) {
-        for (int h = 0; h < filter_size; h++) {
-            for (int w = 0; w < filter_size; w++) {
-                for (int c = 0; c < input_shape.channels; c++) {
-                    weight_grads[f][h][w][c] = 0.0f;
+        for (int c = 0; c < input_shape.channels; c++) {
+            for (int h = 0; h < filter_size; h++) {
+                for (int w = 0; w < filter_size; w++) {
+                    weight_grads[f][c][h][w] = 0.0f;
                 }
             }
         }
@@ -60,7 +60,7 @@ void conv_backward(float*** input, float*** output_grad, float*** input_grad, Di
                             int in_y = out_y * stride + fy - padding;
                             int in_x = out_x * stride + fx - padding;
                             if (in_y >= 0 && in_y < input_shape.height && in_x >= 0 && in_x < input_shape.width) {
-                                input_grad[in_y][in_x][in_ch] += output_grad[out_y][out_x][out_ch] * weights[out_ch][fy][fx][in_ch];
+                                input_grad[in_y][in_x][in_ch] += output_grad[out_y][out_x][out_ch] * weights[out_ch][in_ch][fy][fx];
                             }
                         }
                     }
@@ -80,7 +80,7 @@ void conv_backward(float*** input, float*** output_grad, float*** input_grad, Di
                             int in_y = out_y * stride + fy - padding;
                             int in_x = out_x * stride + fx - padding;
                             if (in_y >= 0 && in_y < input_shape.height && in_x >= 0 && in_x < input_shape.width) {
-                                weight_grads[out_ch][fy][fx][in_ch] += input[in_y][in_x][in_ch] * output_grad[out_y][out_x][out_ch];
+                                weight_grads[out_ch][in_ch][fy][fx] += input[in_y][in_x][in_ch] * output_grad[out_y][out_x][out_ch];
                             }
                         }
                     }
@@ -97,9 +97,9 @@ void update_conv_weights(int num_filters, int filter_size, int input_channels, f
     switch (optimizer->type) {
         case SGD:
             for (int i = 0; i < num_filters; i++) {
-                for (int j = 0; j < filter_size; j++) {
+                for (int j = 0; j < input_channels; j++) {
                     for (int k = 0; k < filter_size; k++) {
-                        for (int l = 0; l < input_channels; l++) {
+                        for (int l = 0; l < filter_size; l++) {
                             conv_weights[i][j][k][l] -= sgd(conv_grads[i][j][k][l], optimizer->optimizer.sgd->momentum, optimizer->optimizer.sgd->momentum_buffer[layer_index][i], optimizer->optimizer.sgd->learning_rate);
                         }
                     }
@@ -109,9 +109,9 @@ void update_conv_weights(int num_filters, int filter_size, int input_channels, f
             break;
         case ADAM:
             for (int i = 0; i < num_filters; i++) {
-                for (int j = 0; j < filter_size; j++) {
+                for (int j = 0; j < input_channels; j++) {
                     for (int k = 0; k < filter_size; k++) {
-                        for (int l = 0; l < input_channels; l++) {
+                        for (int l = 0; l < filter_size; l++) {
                             conv_weights[i][j][k][l] -= adam(conv_grads[i][j][k][l], optimizer->optimizer.adam->t, optimizer->optimizer.adam->m[layer_index][counter], optimizer->optimizer.adam->v[layer_index][counter], optimizer->optimizer.adam->beta1, optimizer->optimizer.adam->beta2, optimizer->optimizer.adam->epsilon, optimizer->optimizer.adam->learning_rate);
                             counter++;
                         }
@@ -123,9 +123,9 @@ void update_conv_weights(int num_filters, int filter_size, int input_channels, f
             break;
         case RMSPROP:
             for (int i = 0; i < num_filters; i++) {
-                for (int j = 0; j < filter_size; j++) {
+                for (int j = 0; j < input_channels; j++) {
                     for (int k = 0; k < filter_size; k++) {
-                        for (int l = 0; l < input_channels; l++) {
+                        for (int l = 0; l < filter_size; l++) {
                             conv_weights[i][j][k][l] -= rmsprop(conv_grads[i][j][k][l], optimizer->optimizer.rmsprop->square_avg_grad[layer_index][counter], optimizer->optimizer.rmsprop->rho, optimizer->optimizer.rmsprop->epsilon, optimizer->optimizer.rmsprop->learning_rate);
                             counter++;
                         }
