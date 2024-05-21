@@ -27,11 +27,12 @@
 
 ## API 使用方法 (API Usage)
 
-How to run the test example? (如何运行测试案例？) (After cloning...)
+How to run the test example? (如何运行测试案例？) (After cloning the project...)
 
 ```shell
 make clean && make && make run_example
 ```
+**(Notice: You need to install `libpng`, `jpeg-turbo`, `stb_image`, `openblas`, `hdf5`)**
 
 This API provides a high-level interface for model designers to easily define, compile, train, and evaluate CNN models. To correctly utilize this API, please follow the instructions below:
 
