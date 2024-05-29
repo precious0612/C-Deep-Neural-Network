@@ -7,7 +7,7 @@
   "output_shape":[
     10
   ],
-  "optimizer":"Adam",
+  "optimizer":"adam",
   "learning_rate":0.00030000001424923539,
   "loss_function":"categorical_crossentropy",
   "metric_name":"accuracy",

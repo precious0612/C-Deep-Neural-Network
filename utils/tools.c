@@ -26,14 +26,14 @@ void print_progress_bar(float progress, int progress_bar_length) {
     int filled_length = (int)(progress * progress_bar_length);
     int remaining_length = progress_bar_length - filled_length;
 
-    printf("[");
+    printf("\r[");
     for (int i = 0; i < filled_length; i++) {
         printf("#");
     }
     for (int i = 0; i < remaining_length; i++) {
         printf("-");
     }
-    printf("] %3.0f%%\n", progress * 100);
+    printf("] %3.0f%%", progress * 100);
     fflush(stdout);
 
     if (progress >= 1.0) {

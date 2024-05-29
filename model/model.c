@@ -747,7 +747,7 @@ Accuracy evaluate_model(Model* model, Dataset* dataset) {
 
     while (batch != NULL) {
         char batch_progress_str[MAX_BATCH_PROGRESS_STR_LEN];
-        snprintf(batch_progress_str, MAX_BATCH_PROGRESS_STR_LEN, "Evaluating Batch %d/%d", batch_count + 1, total_batches);
+        snprintf(batch_progress_str, MAX_BATCH_PROGRESS_STR_LEN, "\nEvaluating Batch %d/%d", batch_count + 1, total_batches);
         printf("%s\n", batch_progress_str);
 
         for (int i = 0; i < batch->num_images; i++) {

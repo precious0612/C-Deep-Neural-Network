@@ -10,9 +10,8 @@
 
 #include "input/data.h"
 #include "dataset.h"
+#include "utils/utils.h"
 #include "model/layer/layer.h"
-#include "utils/compute/convolution.h"
-#include "utils/memory.h"
 #include "model/model.h"
 #include "cdnn.h"
 
@@ -26,7 +25,7 @@ int main(int argc, const char * argv[]) {
     printf("Hello, World!\n");
     
     // TODO: - Test `data.h`
-    const char *filename = "/Users/precious/Neural Network API/Neural Network API/dataset example/test_data_and_val/0/test.jpeg";
+    const char *filename = "dataset example/test_data_and_val/0/test.jpeg";
     Dimensions new_dimensions;
     new_dimensions.width    = 100;
     new_dimensions.height   = 100;
