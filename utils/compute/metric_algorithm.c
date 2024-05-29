@@ -1,12 +1,19 @@
-/* utils/metric.c */
+//
+//  metric_algorithm.c
+//  Neural Network API
+//
+//  Created by 泽瑾瑜 on 5/26/24.
+//
+
+#include "metric_algorithm.h"
 
 #include <math.h>
-// #define INFINITY 1e8
 
-int get_prediction_accuracy(float* output, int num_classes) {
+int get_prediction(float* output, int num_classes) {
+    
     float max_value = -INFINITY;
     int prediction = -1;
-
+    
     for (int c = 0; c < num_classes; c++) {
         float value = output[c];
         if (value > max_value) {
@@ -14,11 +21,12 @@ int get_prediction_accuracy(float* output, int num_classes) {
             prediction = c;
         }
     }
-
+    
     return prediction;
 }
 
-float compute_f1_score(float* output, int label, int num_classes) {
+float f1_score(float* output, int label, int num_classes) {
+    
     float true_positive = 0.0f;
     float false_positive = 0.0f;
     float false_negative = 0.0f;

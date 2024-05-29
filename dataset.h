@@ -1,18 +1,29 @@
-/* dataset.h (high-level)
+//
+//  dataset.h
+//  Neural Network API
+//
+//  Created by 泽瑾瑜 on 5/16/24.
+//
 
- * This file defines a structure to hold a dataset of images, along with its properties.
- * The dataset is a linked list of images, each with its own label (an integer).
- * This structure is used to represent a dataset of images, and is used throughout the codebase.
- *
- */
-
-#ifndef DATASET_H
-#define DATASET_H
+#ifndef dataset_h
+#define dataset_h
 
 #include "input/data.h"
 
-// Structure to describe dataset
-typedef struct Dataset {
+#include <stdint.h>
+
+// TODO: Define the maximum number of images per batch
+#define MAX_IMAGES_PER_BATCH 1000
+#define MNIST_IMAGE_SIZE     28 * 28
+#define MNIST_IMAGE_WIDTH    28
+#define MNIST_IMAGE_HEIGHT   28
+#define MNIST_IMAGE_CHANNEL  1
+#define MNIST_NUM_CLASSES    10
+#define PATH_MAX             256
+
+// MARK: - Define Dataset structure
+
+typedef struct Dataset{
     char* name;
     int batch_size;
     int num_images;
@@ -24,173 +35,137 @@ typedef struct Dataset {
     struct Dataset* val_dataset;
 } Dataset;
 
-/* 
- * Function to load a dataset from a JSON file.
- *
- * This function reads a JSON file containing dataset information, including image file paths and labels,
- * and loads the dataset into memory. The dataset is represented by a Dataset struct.
- * 
- * Standard .json file format:
- * {
- *   "dataset_name": "test_pic",
- *   "num_images": 2,
- *   "images": [
- *     {
- *       "file_path": "input/test_pic/0/test.jpeg",
- *       "label": "0"
- *     }
- * ,    {
- *       "file_path": "input/test_pic/1/test.png",
- *       "label": "1"
- *     }
- *   ]
- * }
- * You also can use the create_dataset_json_file function to create a JSON file from a folder of images. ( just like `test_pic/dataset.json` )
- *
- * Parameters:
- * - file_path: Path to the JSON file containing dataset information.
- * - input_dimensions: Dimensions of the input data (width, height, channels).
- * - data_type: Type of data in the dataset (INT or FLOAT32).
- * - include_val_dataset: 1 if the dataset contains a val folder include validation dataset, 0 otherwise.
- *
- * Returns:
- * - A pointer to the loaded Dataset struct if successful, NULL otherwise.
- *
- * Note: The returned Dataset struct should be freed using the free_dataset function when no longer needed.
- *
- * Usage example:
- * 
- * Dimensions input_dimensions = {28, 28, 1};
- * Dataset* dataset = load_dataset_from_json("dataset.json", input_dimensions, FLOAT32, 1);
- * if (dataset == NULL) {
- *     // Handle error
- * }
- */
-Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensions, DataType data_type, int include_val_dataset);
+// MARK: - Methods Declarations
 
-/* 
- * Function to create a JSON file describing a dataset from image files in a folder structure.
- *
- * This function traverses the specified folder structure, counts the number of images,
- * and constructs a JSON file containing information about the dataset, including image file paths and labels.
- * Each subfolder in the specified folder is treated as a separate class, and the folder name is used as the label.
- *
- * Parameters:
- * - folder_path: Path to the root folder containing the dataset images organized in subfolders by class.
- * - include_val_dataset: 1 if the dataset contains a val folder include validation dataset, 0 otherwise.
- * - validation_size: The ratio of the validation dataset (if include_val_dataset is 0, this parameter is ignored).
- * Tips: If you want to create a JSON file for a dataset that contains a val folder, 
- * you set include_val_dataset to 1 and the validation_size will be ignored.
- *
- * Note: The created JSON file will have the following structure:
- * {
- *   "dataset_name": "Name of the dataset",
- *   "num_images": Number of images in the dataset,
- *   "images": [
- *     {
- *       "file_path": "Path to the image file",
- *       "label": "Label of the image (folder name)"
- *     },
- *     ...
- *   ],
- *   "validation_size": Ratio of the validation dataset
- * }
- * Or if include_val_dataset is 1:
- * {
- *   "dataset_name": "Name of the dataset",
- *   "num_images": Number of images in the dataset,
- *   "images": [
- *     {
- *       "file_path": "Path to the image file",
- *       "label": "Label of the image (folder name)"
- *     },
- *     ...
- *   ],
- *   "val_dataset": "Relative path to the validation dataset folder",
- *   "num_val_images": Number of images in the validation dataset,
- *   "val_images": [
- *    {
- *      "file_path": "Path to the image file",
- *     "label": "Label of the image (folder name)"
- *    },
- *    ...
- *   ]
- * }
- *
- * Usage example:
- * 
- * create_dataset_json_file("dataset_folder", 1, 0.0f);
- * create_dataset_json_file("dataset_folder", 0, 0.2f);
- * 
- * P.S. the JSON file will be created in the same folder as the dataset_folder
- */
+/// Loads a dataset from a JSON file, parsing its content and initializing the dataset structure accordingly.
+/// - Parameters:
+///   - file_path: A constant character pointer to the JSON file path.
+///   - input_dimension: The dimensions of the input data.
+///   - data_type: The type of data stored in the dataset (e.g., `INT` or `FLOAT32`).
+///   - include_val_dataset: An integer flag indicating whether to include a validation dataset (non-zero to include).
+/// - Throws: If memory allocation fails at any point or if the JSON content cannot be parsed, appropriate error messages are printed to `stderr`, and `NULL` is returned. All previously allocated memory is freed in case of errors.
+/// - Returns: A pointer to the newly created Dataset structure, or NULL if memory allocation fails or the JSON content is invalid.
+///
+/// - Example Usage:
+///     ```c
+///     Dataset* dataset = load_dataset_from_json("data/dataset.json", input_dim, FLOAT32, 1);
+///     if (dataset == NULL) {
+///         // Handle error
+///     } 
+///     ```
+///
+Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimension, DataType data_type, int include_val_dataset);
+
+/// Creates a JSON file representing a dataset by scanning a folder for images and optionally including a validation dataset.
+/// - Parameters:
+///   - folder_path: A constant character pointer to the path of the folder containing the dataset.
+///   - include_val_dataset: An integer flag indicating whether to include a validation dataset (non-zero to include).
+///   - validation_size: A float specifying the proportion of the dataset to be used as validation, if `include_val_dataset` is zero.
+/// - Throws: If any folder path is invalid, the folder cannot be opened, or memory allocation fails, appropriate error messages are printed to `stderr` and the function returns without creating the JSON file.
+///
+/// - Example Usage:
+///     ```c
+///     create_dataset_json_file("data/images", 1, 0.2);
+///     ```
+///
 void create_dataset_json_file(const char* folder_path, int include_val_dataset, float validation_size);
 
-/* 
- * Function to split a dataset into multiple batches in-place.
- *
- * This function divides the given dataset into a specified number of batches,
- * ensuring an approximately equal distribution of images among the batches.
- * It modifies the original dataset to link the batches together.
- *
- * Parameters:
- * - original_dataset: Pointer to the Dataset struct representing the original dataset.
- * - num_batches: Number of batches to create.
- *
- * Returns:
- * - A pointer to the modified original dataset, now linked with batch datasets, if successful, NULL otherwise.
- *
- * Note: The original dataset is modified in-place to link the batch datasets.
- * The returned pointer points to the head of the linked list of batches.
- * Ensure to free the entire linked list using the free_dataset function when no longer needed.
- *
- * Usage example:
- * 
- * Dataset* dataset = load_dataset_from_json("dataset.json", input_dimensions, FLOAT32);
- * dataset = split_dataset_into_batches(dataset, 5);
- * if (dataset == NULL) {
- *     // Handle error
- * }
- */
+/// Allocates and initializes a `Dataset` structure with the specified parameters.
+/// - Parameters:
+///   - name: A constant character pointer to the name of the dataset. Can be `NULL`.
+///   - num_images: The number of images in the dataset.
+///   - input_dimensions: The dimensions of the input data.
+///   - data_type: The type of data stored in the dataset (e.g., `INT` or `FLOAT32`).
+/// - Throws: If memory allocation fails at any point, an error message is printed to `stderr`, all previously allocated memory is freed, and `NULL` is returned.
+/// - Returns: A pointer to the newly created `Dataset` structure, or `NULL` if memory allocation fails.
+///
+/// - Example Usage:
+///     ```c
+///     Dimensions input_dimensions = {640, 480, 3};
+///     Dataset* dataset = create_dataset("training_set", 1000, input_dimensions, FLOAT32);
+///     if (dataset == NULL) {
+///         // Handle error
+///     }
+///     ```
+///
+Dataset* create_dataset(const char* name, int num_images, Dimensions input_dimensions, DataType data_type);
+
+/// Splits the original dataset into a specified number of batches and returns the head of a linked list of batch datasets.
+/// - Parameters:
+///   - original_dataset: A pointer to the original `Dataset` to be split into batches.
+///   - num_batches: The number of batches to split the dataset into.
+/// - Throws: If memory allocation fails at any point, an error message is printed to `stderr`, all previously allocated memory is freed, and `NULL` is returned. If the number of images in the original dataset is insufficient for the specified number of batches, an error message is printed and `NULL` is returned.
+/// - Returns: A pointer to the head of the linked list of batch datasets, or `NULL` if memory allocation fails.
+///
+/// - Example Usage:
+///     ```c
+///     Dataset* batch_head = split_dataset_into_batches(original_dataset, 5);
+///     if (batch_head == NULL) {
+///         // Handle error
+///     }
+///     ```
+///
 Dataset* split_dataset_into_batches(Dataset* original_dataset, int num_batches);
 
-/* 
- * Function to split a dataset into multiple batches. (No recommend to use this function directly)
- *
- * This function divides the given dataset into a specified number of batches,
- * ensuring an approximately equal distribution of images among the batches.
- * Each batch is represented by a separate Dataset struct.
- *
- * Parameters:
- * - dataset: Pointer to the Dataset struct representing the original dataset.
- * - num_batches: Number of batches to create.
- *
- * Returns:
- * - An array of pointers to the created batch datasets if successful, NULL otherwise.
- *
- * Note: This function is used in Dataset* split_dataset_into_batches(Dataset* dataset, int num_batches);
- * So this function is not recommended to be used directly.
- *
- * Usage example:
- * 
- * Dataset* dataset = load_dataset_from_json("dataset.json", input_dimensions, FLOAT32);
- * Dataset** batches = create_batches(dataset, 5);
- * if (batches == NULL) {
- *     // Handle error
- * }
- */
-Dataset** create_batches(const Dataset* dataset, int num_batches);
+/// Prints the information of the given dataset including name, dimensions, data type, and validation dataset information if available.
+///
+/// - Parameters:
+///   - dataset: A pointer to the `Dataset` whose information is to be printed.
+///
+/// - Example Usage:
+///     ```c
+///     print_dataset_info(dataset);
+///     ```
+///
+void print_dataset_info(Dataset* dataset);
 
-// Function to free memory allocated for dataset
+/// Creates a copy of the given dataset, including all images, labels, and validation datasets, and returns a pointer to the new dataset.
+/// - Parameters:
+///   - original_dataset: A pointer to the original `Dataset` to be copied.
+/// - Throws: If memory allocation fails at any point, an error message is printed to `stderr`, all previously allocated memory is freed, and `NULL` is returned.
+/// - Returns: A pointer to the copied `Dataset`, or `NULL` if memory allocation fails.
+///
+/// - Example Usage:
+///     ```c
+///     Dataset* copied_dataset = copy_dataset(original_dataset);
+///     if (copied_dataset == NULL) {
+///         // Handle error
+///     }
+///     ```
+///
+Dataset* copy_dataset(Dataset* original_dataset);
+
+/// Frees the memory allocated for the given dataset and all its associated batches, images, labels, and validation datasets.
+/// - Parameters:
+///   - dataset: A pointer to the `Dataset` to be freed.
+///
+/// - Example Usage:
+///     ```c
+///     free_dataset(dataset);
+///     ```
+///
 void free_dataset(Dataset* dataset);
 
+// MARK: - Load MNIST Dataset
+
+/// Creates and returns a pointer to a `Dataset` structure containing the loaded data.
+/// - Parameters:
+///   - train_images_path: The file path to the training images.
+///   - train_labels_path: The file path to the training labels.
+///   - test_images_path: The file path to the test images.
+///   - test_labels_path: The file path to the test labels.
+///   - data_type: The data type of the image data (INT or FLOAT32).
+///
+/// - Returns:
+///   A pointer to the loaded `Dataset` structure if successful, or NULL if an error occurs.
+///
+/// - Example Usage:
+///   ```c
+///   Dataset* mnist = load_mnist_dataset(<train_images_path>, <train_labels_path>, <test_images_path>, <test_labels_path>, FLOAT32);
+///   ```
+///
 Dataset* load_mnist_dataset(const char* train_images_path, const char* train_labels_path,
                              const char* test_images_path, const char* test_labels_path,
                              DataType data_type);
-int** load_mnist_images_int(const char* file_path, int* num_images);
-float** load_mnist_images_float(const char* file_path, int* num_images);
-uint8_t* load_mnist_labels(const char* file_path, int* num_labels);
-void free_mnist_images(void** images, int num_images, DataType data_type);
-void free_mnist_images_int(int** images, int num_images);
 
-#endif /* DATASET_H */
+#endif /* dataset_h */

@@ -1,31 +1,39 @@
-/* utils/tools.c */
+//
+//  tools.c
+//  Neural Network API
+//
+//  Created by 泽瑾瑜 on 5/18/24.
+//
 
-#include <string.h>
-#include <stdio.h>
 #include "tools.h"
 
-#define PROGRESS_BAR_LENGTH 50
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-int is_empty_string(const char* str) {
-    return str == NULL || str[0] == '\0';
-}
+void print_progress_bar(float progress, int progress_bar_length) {
+    // Validate input
+    if (progress < 0.0f || progress > 1.0f) {
+        fprintf(stderr, "Error: Invalid progress value (should be between 0.0 and 1.0)\n");
+        return;
+    }
 
-int not_empty_string(const char* str) {
-    return str != NULL && str[0] != '\0';
-}
+    if (progress_bar_length <= 0 || progress_bar_length > MAX_PROGRESS_BAR_LENGTH) {
+        fprintf(stderr, "Error: Invalid progress bar length (should be between 1 and %d)\n", MAX_PROGRESS_BAR_LENGTH);
+        return;
+    }
 
-void print_progress_bar(float progress) {
-    int filled_length = (int)(progress * PROGRESS_BAR_LENGTH);
-    int remaining_length = PROGRESS_BAR_LENGTH - filled_length;
+    int filled_length = (int)(progress * progress_bar_length);
+    int remaining_length = progress_bar_length - filled_length;
 
-    printf("\r[");
+    printf("[");
     for (int i = 0; i < filled_length; i++) {
         printf("#");
     }
     for (int i = 0; i < remaining_length; i++) {
         printf("-");
     }
-    printf("] %3.0f%%", progress * 100);
+    printf("] %3.0f%%\n", progress * 100);
     fflush(stdout);
 
     if (progress >= 1.0) {
@@ -33,127 +41,15 @@ void print_progress_bar(float progress) {
     }
 }
 
-void save_conv_weights(hid_t group_id, float ****weights, int num_filters, int filter_size, int channels) {
-    hid_t dataset_id, dataspace_id;
-    hsize_t dims[4] = {num_filters, channels, filter_size, filter_size};
-
-    dataspace_id = H5Screate_simple(4, dims, NULL);
-    dataset_id = H5Dcreate(group_id, "weight", H5T_IEEE_F32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *weights);
-
-    H5Dclose(dataset_id);
-    H5Sclose(dataspace_id);
+float rand_uniform(float min, float max) {
+    static int seeded = 0;
+    if (!seeded) {
+        srand((unsigned int)time(NULL));
+        seeded = 1;
+    }
+    return min + (max - min) * (float)rand() / RAND_MAX;
 }
 
-void save_fc_weights(hid_t group_id, float **weights, int num_neurons, int input_size) {
-    hid_t dataset_id, dataspace_id;
-    hsize_t dims[2] = {num_neurons, input_size};
-
-    dataspace_id = H5Screate_simple(2, dims, NULL);
-    dataset_id = H5Dcreate(group_id, "weight", H5T_IEEE_F32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *weights);
-
-    H5Dclose(dataset_id);
-    H5Sclose(dataspace_id);
-}
-
-void save_biases(hid_t group_id, float *biases, int num_biases) {
-    hid_t dataset_id, dataspace_id;
-    hsize_t dims[1] = {num_biases};
-
-    dataspace_id = H5Screate_simple(1, dims, NULL);
-    dataset_id = H5Dcreate(group_id, "bias", H5T_IEEE_F32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, biases);
-
-    H5Dclose(dataset_id);
-    H5Sclose(dataspace_id);
-}
-
-void load_conv_weights(hid_t group_id, float *****weights, int num_filters, int filter_size, int channels) {
-    hid_t dataset_id, dataspace_id;
-    hsize_t dims[4] = {num_filters, channels, filter_size, filter_size};
-
-    dataset_id = H5Dopen(group_id, "weight", H5P_DEFAULT);
-    dataspace_id = H5Dget_space(dataset_id);
-
-    if (*weights != NULL) {
-        *weights = (float ****) malloc(sizeof(float ***) * num_filters);
-        for (int i = 0; i < num_filters; i++) {
-            (*weights)[i] = (float ***) malloc(sizeof(float **) * channels);
-            for (int j = 0; j < channels; j++) {
-                (*weights)[i][j] = (float **) malloc(sizeof(float *) * filter_size);
-                for (int k = 0; k < filter_size; k++) {
-                    (*weights)[i][j][k] = (float *) malloc(sizeof(float) * filter_size);
-                }
-            }
-        }
-    }
- 
-    float* temp_weights = (float *)malloc(sizeof(float) * num_filters * channels * filter_size * filter_size);
-
-    H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, temp_weights);
-    for (int i = 0; i < num_filters; i++) {
-        for (int j = 0; j < channels; j++) {
-            for (int k = 0; k < filter_size; k++) {
-                for (int l = 0; l < filter_size; l++) {
-                    (*weights)[i][j][k][l] = temp_weights[i * channels * filter_size * filter_size + j * filter_size * filter_size + k * filter_size + l];
-                }
-            }
-        }
-    }
-
-    free(temp_weights);
-
-    H5Dclose(dataset_id);
-    H5Sclose(dataspace_id);
-}
-
-void load_fc_weights(hid_t group_id, float ***weights, int num_neurons, int input_size) {
-    hid_t dataset_id, dataspace_id;
-    hsize_t dims[2] = {num_neurons, input_size};
-
-    dataset_id = H5Dopen(group_id, "weight", H5P_DEFAULT);
-    dataspace_id = H5Dget_space(dataset_id);
-
-    if (*weights == NULL) {
-        *weights = (float **) malloc(sizeof(float *) * num_neurons);
-        for (int i = 0; i < num_neurons; i++) {
-            (*weights)[i] = (float *) malloc(sizeof(float) * input_size);
-        }
-    }
-
-    float* temp_weights = (float *)malloc(sizeof(float) * num_neurons * input_size);
-
-    H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, temp_weights);
-
-    for (int i = 0; i < num_neurons; i++) {
-        for (int j = 0; j < input_size; j++) {
-            (*weights)[i][j] = temp_weights[i * input_size + j];
-        }
-    }
-
-    free(temp_weights);
-
-    H5Dclose(dataset_id);
-    H5Sclose(dataspace_id);
-}
-
-void load_biases(hid_t group_id, float **biases, int num_biases) {
-    hid_t dataset_id, dataspace_id;
-    hsize_t dims[1] = {num_biases};
-
-    dataset_id = H5Dopen(group_id, "bias", H5P_DEFAULT);
-    dataspace_id = H5Dget_space(dataset_id);
-
-    if (*biases == NULL) {
-        *biases = (float *) malloc(sizeof(float) * num_biases);
-    }
-
-    H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *biases);
-
-    H5Dclose(dataset_id);
-    H5Sclose(dataspace_id);
+int rand_int(int min, int max) {
+    return rand_uniform(min, max + 1);
 }

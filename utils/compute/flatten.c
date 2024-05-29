@@ -1,26 +1,57 @@
-/* utils/compute/flatten.c */
+//
+//  flatten.c
+//  Neural Network API
+//
+//  Created by 泽瑾瑜 on 5/21/24.
+//
 
 #include "flatten.h"
 
-void flatten(float*** input, float* flattened, Dimensions input_shape) {
-    int index = 0;
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                flattened[index++] = input[y][x][c];
-            }
-        }
+#include <string.h>
+#include <stdio.h>
+
+#include "../memory.h"
+
+float*** flatten(float*** input, int input_width, int input_height, int input_channles) {
+    
+    if (input == NULL) {
+        fprintf(stderr, "Flatten Layer input is NULL\n");
+        return NULL;
     }
+    
+    int size = input_width * input_height * input_channles;
+    
+    float*** output = calloc_3d_float_array(1, 1, size);
+    if (output == NULL) {
+        fprintf(stderr, "Allocating memory failed during Flatting\n");
+        return NULL;
+    }
+    
+    float* input_p  = &input[0][0][0];
+    float* output_p = &output[0][0][0];
+    memcpy(output_p, input_p, size * sizeof(float));
+    
+    return output;
 }
 
-void unflatten(float* flattened, float*** output, Dimensions output_shape) {
-    int index = 0;
-    for (int y = 0; y < output_shape.height; y++) {
-        for (int x = 0; x < output_shape.width; x++) {
-            for (int c = 0; c < output_shape.channels; c++) {
-                output[y][x][c] = flattened[index++];
-            }
-        }
+float*** unflatten(float*** input, int output_width, int output_height, int output_channles) {
+    
+    if (input == NULL) {
+        fprintf(stderr, "Flatten Layer input is NULL\n");
+        return NULL;
     }
+    
+    int size = output_width * output_height * output_channles;
+    
+    float*** output = calloc_3d_float_array(output_width, output_height, output_channles);
+    if (output == NULL) {
+        fprintf(stderr, "Allocating memory failed during Flatting\n");
+        return NULL;
+    }
+    
+    float* input_p  = &input[0][0][0];
+    float* output_p = &output[0][0][0];
+    memcpy(output_p, input_p, size * sizeof(float));
+    
+    return output;
 }
-

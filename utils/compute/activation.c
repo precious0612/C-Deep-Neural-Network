@@ -1,195 +1,209 @@
-/* utils/compute/activation.c */
-
-#include <math.h>
-#include <string.h>
-#include <stdio.h>
+//
+//  activation.c
+//  Neural Network API
+//
+//  Created by 泽瑾瑜 on 5/20/24.
+//
 
 #include "activation.h"
+
+#include <math.h>
+#include <stdio.h>
+#include <float.h>
+
 #include "../memory.h"
 
-// #define FLT_MAX 3.402823466e+38F
+static float*** relu_forward(float*** input, int input_width, int input_height, int input_channels) {
+    
+    float*** output = calloc_3d_float_array(input_width, input_height, input_channels);
+    if (output == NULL) {
+        fprintf(stderr, "Error allocating memory during activation\n");
+        return NULL;
+    }
+    
+    float* input_p  = &input[0][0][0];
+    float* output_p = &output[0][0][0];
+    int size = input_width * input_height * input_channels;
 
-float*** relu_forward(float*** input, Dimensions input_shape) {
-    float*** output = malloc_3d_float_array(input_shape.height, input_shape.width, input_shape.channels);
-
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                output[y][x][c] = fmaxf(0, input[y][x][c]);
-            }
-        }
+    for (int i = 0; i < size; ++i) {
+        output_p[i] = fmaxf(0.0f, input_p[i]);
     }
 
     return output;
 }
 
-void relu_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                input_grad[y][x][c] = (input[y][x][c] > 0) ? output_grad[y][x][c] : 0;
-            }
-        }
+static void relu_backward(float*** output, float*** output_grad, float*** input_grad, int output_size) {
+    
+    float* output_p      = &output[0][0][0];
+    float* output_grad_p = &output_grad[0][0][0];
+    float* input_grad_p  = &input_grad[0][0][0];
+
+    for (int i = 0; i < output_size; ++i) {
+        input_grad_p[i] = (output_p[i] > 0) ? output_grad_p[i] : 0.0f;
     }
 }
 
-float*** sigmoid_forward(float*** input, Dimensions input_shape) {
-    float*** output = malloc_3d_float_array(input_shape.height, input_shape.width, input_shape.channels);
+static float*** sigmoid_forward(float*** input, int input_width, int input_height, int input_channels) {
+    
+    float*** output = calloc_3d_float_array(input_width, input_height, input_channels);
+    if (output == NULL) {
+        fprintf(stderr, "Error allocating memory during activation\n");
+        return NULL;
+    }
+    
+    float* input_p  = &input[0][0][0];
+    float* output_p = &output[0][0][0];
+    int size = input_width * input_height * input_channels;
+    
+    for (int i = 0; i < size; ++i) {
+        output_p[i] = powf(expf(-input_p[i]) + 1.0f, -1.0f);
+    }
+    
+    return output;
+}
 
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                output[y][x][c] = 1.0f / (1.0f + expf(-input[y][x][c]));
-            }
-        }
+static void sigmoid_backward(float*** output, float*** output_grad, float*** input_grad, int output_size) {
+    
+    float* output_p      = &output[0][0][0];
+    float* output_grad_p = &output_grad[0][0][0];
+    float* input_grad_p  = &input_grad[0][0][0];
+    
+    for (int i = 0; i < output_size; ++i) {
+        input_grad_p[i] = output_grad_p[i] * output_p[i] * (1.0f - output_p[i]);
+    }
+}
+
+static float*** tanh_forward(float*** input, int input_width, int input_height, int input_channels) {
+    
+    float*** output = calloc_3d_float_array(input_width, input_height, input_channels);
+    if (output == NULL) {
+        fprintf(stderr, "Error allocating memory during activation\n");
+        return NULL;
+    }
+    
+    float* input_p  = &input[0][0][0];
+    float* output_p = &output[0][0][0];
+    int size = input_width * input_height * input_channels;
+    
+    for (int i = 0; i < size; ++i) {
+        output_p[i] = tanhf(input_p[i]);
+    }
+    
+    return output;
+}
+
+static void tanh_backward(float*** output, float*** output_grad, float*** input_grad, int output_size) {
+    
+    float* output_p      = &output[0][0][0];
+    float* output_grad_p = &output_grad[0][0][0];
+    float* input_grad_p  = &input_grad[0][0][0];
+    
+    for (int i = 0; i < output_size; ++i) {
+        input_grad_p[i] = output_grad_p[i] * (1.0f - powf(output_p[i], 2.0f));
+    }
+}
+
+static float*** softmax_forward(float*** input, int input_width, int input_height, int input_channels) {
+    
+    if (input == NULL) {
+        fprintf(stderr, "ReLU Activation input is NULL\n");
+        return NULL;
+    }
+    
+    float*** output = calloc_3d_float_array(input_width, input_height, input_channels);
+    if (output == NULL) {
+        fprintf(stderr, "Error allocating memory during activation\n");
+        return NULL;
+    }
+    
+    float* input_p  = &input[0][0][0];
+    float* output_p = &output[0][0][0];
+    int size = input_width * input_height * input_channels;
+    
+    float max_val = -FLT_MAX;
+    float sum_exp = 0.0f;
+    
+    for (int i = 0; i < size; ++i) {
+        max_val = fmaxf(max_val, input_p[i]);
+    }
+    for (int i = 0; i < size; ++i) {
+        sum_exp += expf(input_p[i] - max_val);
+    }
+    for (int i = 0; i < size; ++i) {
+        output_p[i] = expf(input_p[i] - max_val) / sum_exp;
     }
 
     return output;
 }
 
-void sigmoid_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                float sigmoid_val = input[y][x][c];
-                input_grad[y][x][c] = output_grad[y][x][c] * sigmoid_val * (1 - sigmoid_val);
-            }
-        }
+static void softmax_backward(float*** output, float*** output_grad, float*** input_grad, int output_size) {
+    
+    float* output_p      = &output[0][0][0];
+    float* output_grad_p = &output_grad[0][0][0];
+    float* input_grad_p  = &input_grad[0][0][0];
+    
+    float sum_grad = 0.0f;
+    
+    for (int i = 0; i < output_size; ++i) {
+        sum_grad += output_grad_p[i];
+    }
+    for (int i = 0; i < output_size; ++i) {
+        input_grad_p[i] = output_grad_p[i] - sum_grad * output_p[i];
     }
 }
 
-float*** tanh_forward(float*** input, Dimensions input_shape) {
-    float*** output = malloc_3d_float_array(input_shape.height, input_shape.width, input_shape.channels);
-
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                output[y][x][c] = tanhf(input[y][x][c]);
-            }
-        }
+float*** forward_activation(const ActivationType activation, float*** input, int input_width, int input_height, int input_channels) {
+    
+    if (input == NULL) {
+        fprintf(stderr, "Activation input is NULL\n");
+        return NULL;
     }
-
-    return output;
-}
-
-void tanh_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                float tanh_val = input[y][x][c];
-                input_grad[y][x][c] = output_grad[y][x][c] * (1 - tanh_val * tanh_val);
-            }
-        }
-    }
-}
-
-float*** max_forward(float*** input, Dimensions input_shape) {
-    float*** output = malloc_3d_float_array(input_shape.height, input_shape.width, input_shape.channels);
-
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            float max_val = -FLT_MAX;
-            int max_idx = 0;
-            for (int c = 0; c < input_shape.channels; c++) {
-                if (input[y][x][c] > max_val) {
-                    max_val = input[y][x][c];
-                    max_idx = c;
-                }
-            }
-            for (int c = 0; c < input_shape.channels; c++) {
-                output[y][x][c] = (c == max_idx) ? 1.0f : 0.0f;
-            }
-        }
-    }
-
-    return output;
-}
-
-void max_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            float max_val = -FLT_MAX;
-            int max_idx = 0;
-            for (int c = 0; c < input_shape.channels; c++) {
-                if (input[y][x][c] > max_val) {
-                    max_val = input[y][x][c];
-                    max_idx = c;
-                }
-            }
-            for (int c = 0; c < input_shape.channels; c++) {
-                input_grad[y][x][c] = (c == max_idx) ? output_grad[y][x][c] : 0.0f;
-            }
-        }
-    }
-}
-
-float*** softmax_forward(float*** input, Dimensions input_shape) {
-    float*** output = malloc_3d_float_array(input_shape.height, input_shape.width, input_shape.channels);
-
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            float max_val = -FLT_MAX;
-            for (int c = 0; c < input_shape.channels; c++) {
-                max_val = fmaxf(max_val, input[y][x][c]);
-            }
-            float sum_exp = 0.0f;
-            for (int c = 0; c < input_shape.channels; c++) {
-                sum_exp += expf(input[y][x][c] - max_val);
-            }
-            for (int c = 0; c < input_shape.channels; c++) {
-                output[y][x][c] = expf(input[y][x][c] - max_val) / sum_exp;
-            }
-        }
-    }
-
-    return output;
-}
-
-void softmax_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            float sum_grad = 0.0f;
-            for (int c = 0; c < input_shape.channels; c++) {
-                sum_grad += output_grad[y][x][c];
-            }
-            for (int c = 0; c < input_shape.channels; c++) {
-                float softmax_val = input[y][x][c];
-                input_grad[y][x][c] = output_grad[y][x][c] - sum_grad * softmax_val;
-            }
-        }
-    }
-}
-
-float*** forward_activation(const char* activation, float*** input, Dimensions input_shape) {
+    
     float*** output = NULL;
-    if (strcmp(activation, "relu") == 0 || strcmp(activation, "ReLU") == 0) {
-        output = relu_forward(input, input_shape);
-    } else if (strcmp(activation, "sigmoid") == 0) {
-        output = sigmoid_forward(input, input_shape);
-    } else if (strcmp(activation, "tanh") == 0) {
-        output = tanh_forward(input, input_shape);
-    } else if (strcmp(activation, "max") == 0) {
-        output = max_forward(input, input_shape);
-    } else if (strcmp(activation, "softmax") == 0) {
-        output = softmax_forward(input, input_shape);
-    } else {
-        fprintf(stderr, "Error: Unknown activation function %s.\n", activation);
+    
+    switch (activation) {
+        case RELU:
+            output = relu_forward(input, input_width, input_height, input_channels);
+            break;
+            
+        case SIGMOID:
+            output = sigmoid_forward(input, input_width, input_height, input_channels);
+            break;
+            
+        case SOFTMAX:
+            output = softmax_forward(input, input_width, input_height, input_channels);
+            break;
+    
+        default:
+            fprintf(stderr, "Error: Unknown activation function\n");
+            break;
     }
+
     return output;
 }
 
-void backward_activation(const char* activation, float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {
-    if (strcmp(activation, "relu") == 0 || strcmp(activation, "ReLU") == 0) {
-        relu_backward(input, output_grad, input_grad, input_shape);
-    } else if (strcmp(activation, "sigmoid") == 0) {
-        sigmoid_backward(input, output_grad, input_grad, input_shape);
-    } else if (strcmp(activation, "tanh") == 0) {
-        tanh_backward(input, output_grad, input_grad, input_shape);
-    } else if (strcmp(activation, "max") == 0) {
-        max_backward(input, output_grad, input_grad, input_shape);
-    } else if (strcmp(activation, "softmax") == 0) {
-        softmax_backward(input, output_grad, input_grad, input_shape);
-    } else {
-        fprintf(stderr, "Error: Unknown activation function %s.\n", activation);
+void backward_activation(const ActivationType activation, float*** output, float*** output_grad, float*** input_grad, int output_size) {
+    
+    if (output == NULL || output_grad == NULL || input_grad == NULL) {
+        fprintf(stderr, "Activation input (backward) is NULL\n");
+        return;
+    }
+    
+    switch (activation) {
+        case RELU:
+            relu_backward(output, output_grad, input_grad, output_size);
+            break;
+        
+        case SIGMOID:
+            sigmoid_backward(output, output_grad, input_grad, output_size);
+            break;
+            
+        case SOFTMAX:
+            softmax_backward(output, output_grad, input_grad, output_size);
+            break;
+            
+        default:
+            fprintf(stderr, "Error: Unknown activation function\n");
+            break;
     }
 }

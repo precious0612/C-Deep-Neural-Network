@@ -1,42 +1,59 @@
-/* utils/compute/dropout.c */
-
-#include <stdlib.h>
-#include <string.h>
+//
+//  dropout.c
+//  Neural Network API
+//
+//  Created by 泽瑾瑜 on 5/20/24.
+//
 
 #include "dropout.h"
-#include "../rand.h"
-#include "../memory.h"
-#include "../tensor.h"
 
-float*** dropout_forward(float*** input, Dimensions input_shape, float dropout_rate) {
-    // Allocate memory for the output
-    float*** output = copy_3d_array(input, input_shape);
+#include <stdio.h>
+
+#include "../tools.h"
+#include "../memory.h"
+
+float*** dropout_forward(float*** input, int input_width, int input_height, int input_channels, float dropout_rate) {
+    
+    if (input == NULL) {
+        fprintf(stderr, "Dropout Layer input is NULL\n");
+        return NULL;
+    }
+    
+    float*** output = copy_3d_float_array(input, input_width, input_height, input_channels);
+    if (output == NULL) {
+        fprintf(stderr, "Error allocating memory during dropout\n");
+        return NULL;
+    }
+    
+    int size = input_width * input_height * input_channels;
+    float* output_p = &output[0][0][0];
 
     // Apply dropout
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                if (rand_uniform(0.0, 1.0) < dropout_rate) {
-                    output[y][x][c] = 0.0f;
-                }
-            }
+    for (int i = 0; i < size; ++i) {
+        if (rand_uniform(0.0, 1.0) < dropout_rate) {
+            output_p[i] = 0.0f;
         }
     }
 
     return output;
 }
 
-void dropout_backward(float*** input, float*** output_grad, float*** input_grad, Dimensions input_shape) {
-    // Compute gradients for the input
-    for (int y = 0; y < input_shape.height; y++) {
-        for (int x = 0; x < input_shape.width; x++) {
-            for (int c = 0; c < input_shape.channels; c++) {
-                if (input[y][x][c] != 0.0f) {
-                    input_grad[y][x][c] = output_grad[y][x][c];
-                } else {
-                    input_grad[y][x][c] = 0.0f;
-                }
-            }
+void dropout_backward(float*** input, float*** output_grad, float*** input_grad, int input_size) {
+    
+    if (input == NULL || output_grad == NULL || input_grad == NULL) {
+        fprintf(stderr, "Dropout Layer input (backward) is NULL\n");
+        return;
+    }
+    
+    float* input_p       = &input[0][0][0];
+    float* output_grad_p = &output_grad[0][0][0];
+    float* input_grad_p  = &input_grad[0][0][0];
+    
+    for (int i = 0; i < input_size; ++i) {
+        if (input_p[i] != 0.0f) {
+            input_grad_p[i] = output_grad_p[i];
+        } else {
+            input_grad_p[i] = 0.0f;
         }
     }
 }
