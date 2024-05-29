@@ -387,7 +387,7 @@ void create_dataset_json_file(const char* folder_path, int include_val_dataset, 
     // Write validation dataset information if include_val_dataset is true
     if (include_val_dataset && num_val_images > 0) {
         fprintf(file, ",\n  \"val_dataset\": \"%s\",\n", "val");
-        fprintf(file, "  \"num_val_images\": %d,\n", num_val_images - 1);
+        fprintf(file, "  \"num_val_images\": %d,\n", num_val_images - 2);
         fprintf(file, "  \"val_images\": [\n");
 
         // Reset the directory stream pointer to the beginning
@@ -564,7 +564,7 @@ void print_dataset_info(Dataset* dataset) {
         return;
     }
     
-    printf("Loaded dataset:\n");
+    printf("\nLoaded dataset:\n");
     printf("  Name:                    %s\n", dataset->name);
     printf("  Dimensions:              %d x %d x %d\n", dataset->data_dimensions.width, dataset->data_dimensions.height, dataset->data_dimensions.channels);
     printf("  Data Type:               %s\n", dataset->data_type == INT? "UINT8" : "FLOAT32");
@@ -961,7 +961,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
         return NULL;
     }
 
-    printf("Loading training data: ");
+    printf("\nLoading training data: ");
     for (int i = 0; i < num_train_images; ++i) {
         dataset->images[i] = (InputData*)malloc(sizeof(InputData));
         if (data_type == INT) {

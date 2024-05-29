@@ -874,7 +874,7 @@ static herr_t save_conv_weights(hid_t group_id, float ****weights, int num_filte
         return -1;
     }
 
-    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "conv_weights");
+    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "weight");
     dataset_id = H5Dcreate(group_id, dataset_name, H5T_IEEE_F32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dataset_id < 0) {
         fprintf(stderr, "Error creating HDF5 dataset: %s\n", dataset_name);
@@ -913,7 +913,7 @@ static herr_t save_fc_weights(hid_t group_id, float **weights, int num_neurons, 
         return -1;
     }
 
-    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "fc_weights");
+    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "weight");
     dataset_id = H5Dcreate(group_id, dataset_name, H5T_IEEE_F32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dataset_id < 0) {
         fprintf(stderr, "Error creating HDF5 dataset: %s\n", dataset_name);
@@ -952,7 +952,7 @@ static herr_t save_biases(hid_t group_id, float *biases, int num_biases) {
         return -1;
     }
 
-    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "biases");
+    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "bias");
     dataset_id = H5Dcreate(group_id, dataset_name, H5T_IEEE_F32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dataset_id < 0) {
         fprintf(stderr, "Error creating HDF5 dataset: %s\n", dataset_name);
@@ -1049,7 +1049,7 @@ void save_model_weights(Model* model, const char* filename) {
     H5Fclose(file_id);
 }
 
-static herr_t load_conv_weights(hid_t group_id, float *****weights, int num_filters, int filter_size, int channels) {
+static herr_t load_conv_weights(hid_t group_id, float ****weights, int num_filters, int filter_size, int channels) {
     if (weights == NULL || num_filters <= 0 || filter_size <= 0 || channels <= 0) {
         fprintf(stderr, "Error: Invalid input parameters for load_conv_weights.\n");
         return -1;
@@ -1058,7 +1058,7 @@ static herr_t load_conv_weights(hid_t group_id, float *****weights, int num_filt
     hid_t dataset_id, dataspace_id;
     char dataset_name[MAX_DATASET_NAME_LEN];
 
-    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "conv_weights");
+    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "weight");
     dataset_id = H5Dopen(group_id, dataset_name, H5P_DEFAULT);
     if (dataset_id < 0) {
         fprintf(stderr, "Error opening HDF5 dataset: %s\n", dataset_name);
@@ -1072,71 +1072,18 @@ static herr_t load_conv_weights(hid_t group_id, float *****weights, int num_filt
         return -1;
     }
 
-    if (*weights == NULL) {
-        *weights = (float ****) malloc(sizeof(float ***) * num_filters);
-        if (*weights == NULL) {
+    if (weights == NULL) {
+        weights = calloc_4d_float_array(num_filters, channels, filter_size, filter_size);
+        if (weights == NULL) {
             fprintf(stderr, "Error allocating memory for conv weights.\n");
             H5Dclose(dataset_id);
             H5Sclose(dataspace_id);
             return -1;
         }
-
-        for (int i = 0; i < num_filters; i++) {
-            (*weights)[i] = (float ***) malloc(sizeof(float **) * channels);
-            if ((*weights)[i] == NULL) {
-                fprintf(stderr, "Error allocating memory for conv weights.\n");
-                for (int j = 0; j < i; j++) {
-                    free((*weights)[j]);
-                }
-                free(*weights);
-                H5Dclose(dataset_id);
-                H5Sclose(dataspace_id);
-                return -1;
-            }
-
-            for (int j = 0; j < channels; j++) {
-                (*weights)[i][j] = (float **) malloc(sizeof(float *) * filter_size);
-                if ((*weights)[i][j] == NULL) {
-                    fprintf(stderr, "Error allocating memory for conv weights.\n");
-                    for (int k = 0; k < j; k++) {
-                        free((*weights)[i][k]);
-                    }
-                    free((*weights)[i]);
-                    for (int j = 0; j < i; j++) {
-                        free((*weights)[j]);
-                    }
-                    free(*weights);
-                    H5Dclose(dataset_id);
-                    H5Sclose(dataspace_id);
-                    return -1;
-                }
-
-                for (int k = 0; k < filter_size; k++) {
-                    (*weights)[i][j][k] = (float *) malloc(sizeof(float) * filter_size);
-                    if ((*weights)[i][j][k] == NULL) {
-                        fprintf(stderr, "Error allocating memory for conv weights.\n");
-                        for (int l = 0; l < k; l++) {
-                            free((*weights)[i][j][l]);
-                        }
-                        free((*weights)[i][j]);
-                        for (int k = 0; k < j; k++) {
-                            free((*weights)[i][k]);
-                        }
-                        free((*weights)[i]);
-                        for (int j = 0; j < i; j++) {
-                            free((*weights)[j]);
-                        }
-                        free(*weights);
-                        H5Dclose(dataset_id);
-                        H5Sclose(dataspace_id);
-                        return -1;
-                    }
-                }
-            }
-        }
     }
 
-    herr_t status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *weights);
+    float* weights_p = &weights[0][0][0][0];
+    herr_t status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, weights_p);
     if (status < 0) {
         fprintf(stderr, "Error reading HDF5 dataset: %s\n", dataset_name);
         H5Dclose(dataset_id);
@@ -1149,7 +1096,7 @@ static herr_t load_conv_weights(hid_t group_id, float *****weights, int num_filt
     return 0;
 }
 
-static herr_t load_fc_weights(hid_t group_id, float ***weights, int num_neurons, int input_size) {
+static herr_t load_fc_weights(hid_t group_id, float **weights, int num_neurons, int input_size) {
     if (weights == NULL || num_neurons <= 0 || input_size <= 0) {
         fprintf(stderr, "Error: Invalid input parameters for load_fc_weights.\n");
         return -1;
@@ -1158,7 +1105,7 @@ static herr_t load_fc_weights(hid_t group_id, float ***weights, int num_neurons,
     hid_t dataset_id, dataspace_id;
     char dataset_name[MAX_DATASET_NAME_LEN];
 
-    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "fc_weights");
+    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "weight");
     dataset_id = H5Dopen(group_id, dataset_name, H5P_DEFAULT);
     if (dataset_id < 0) {
         fprintf(stderr, "Error opening HDF5 dataset: %s\n", dataset_name);
@@ -1172,31 +1119,18 @@ static herr_t load_fc_weights(hid_t group_id, float ***weights, int num_neurons,
         return -1;
     }
 
-    if (*weights == NULL) {
-        *weights = (float **) malloc(sizeof(float *) * num_neurons);
-        if (*weights == NULL) {
+    if (weights == NULL) {
+        weights = calloc_2d_float_array(num_neurons, input_size);
+        if (weights == NULL) {
             fprintf(stderr, "Error allocating memory for fc weights.\n");
             H5Dclose(dataset_id);
             H5Sclose(dataspace_id);
             return -1;
         }
-
-        for (int i = 0; i < num_neurons; i++) {
-            (*weights)[i] = (float *) malloc(sizeof(float) * input_size);
-            if ((*weights)[i] == NULL) {
-                fprintf(stderr, "Error allocating memory for fc weights.\n");
-                for (int j = 0; j < i; j++) {
-                    free((*weights)[j]);
-                }
-                free(*weights);
-                H5Dclose(dataset_id);
-                H5Sclose(dataspace_id);
-                return -1;
-            }
-        }
     }
 
-    herr_t status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *weights);
+    float* weights_p = &weights[0][0];
+    herr_t status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, weights_p);
     if (status < 0) {
         fprintf(stderr, "Error reading HDF5 dataset: %s\n", dataset_name);
         H5Dclose(dataset_id);
@@ -1209,7 +1143,7 @@ static herr_t load_fc_weights(hid_t group_id, float ***weights, int num_neurons,
     return 0;
 }
 
-static herr_t load_biases(hid_t group_id, float **biases, int num_biases) {
+static herr_t load_biases(hid_t group_id, float *biases, int num_biases) {
     if (biases == NULL || num_biases <= 0) {
         fprintf(stderr, "Error: Invalid input parameters for load_biases.\n");
         return -1;
@@ -1218,7 +1152,7 @@ static herr_t load_biases(hid_t group_id, float **biases, int num_biases) {
     hid_t dataset_id, dataspace_id;
     char dataset_name[MAX_DATASET_NAME_LEN];
 
-    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "biases");
+    snprintf(dataset_name, MAX_DATASET_NAME_LEN, "bias");
     dataset_id = H5Dopen(group_id, dataset_name, H5P_DEFAULT);
     if (dataset_id < 0) {
         fprintf(stderr, "Error opening HDF5 dataset: %s\n", dataset_name);
@@ -1232,9 +1166,9 @@ static herr_t load_biases(hid_t group_id, float **biases, int num_biases) {
         return -1;
     }
 
-    if (*biases == NULL) {
-        *biases = (float *) malloc(sizeof(float) * num_biases);
-        if (*biases == NULL) {
+    if (biases == NULL) {
+        biases = calloc(num_biases, sizeof(float));
+        if (biases == NULL) {
             fprintf(stderr, "Error allocating memory for biases.\n");
             H5Dclose(dataset_id);
             H5Sclose(dataspace_id);
@@ -1242,7 +1176,7 @@ static herr_t load_biases(hid_t group_id, float **biases, int num_biases) {
         }
     }
 
-    herr_t status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *biases);
+    herr_t status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, biases);
     if (status < 0) {
         fprintf(stderr, "Error reading HDF5 dataset: %s\n", dataset_name);
         H5Dclose(dataset_id);
@@ -1259,10 +1193,10 @@ static herr_t load_layer_weights(hid_t group_id, Layer* layer) {
     switch (layer->type) {
         case CONVOLUTIONAL:
             // Load convolutional layer weights and biases
-            if (load_conv_weights(group_id, &layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->input_shape.channels) != 0) {
+            if (load_conv_weights(group_id, layer->weights.conv_weights, layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->input_shape.channels) != 0) {
                 return -1;
             }
-            if (load_biases(group_id, &layer->biases, layer->params.conv_params.num_filters) != 0) {
+            if (load_biases(group_id, layer->biases, layer->params.conv_params.num_filters) != 0) {
                 return -1;
             }
             break;
@@ -1271,10 +1205,10 @@ static herr_t load_layer_weights(hid_t group_id, Layer* layer) {
             break;
         case FULLY_CONNECTED:
             // Load fully connected layer weights and biases
-            if (load_fc_weights(group_id, &layer->weights.fc_weights, layer->params.fc_params.num_neurons, layer->input_shape.width * layer->input_shape.height * layer->input_shape.channels) != 0) {
+            if (load_fc_weights(group_id, layer->weights.fc_weights, layer->params.fc_params.num_neurons, layer->input_shape.width * layer->input_shape.height * layer->input_shape.channels) != 0) {
                 return -1;
             }
-            if (load_biases(group_id, &layer->biases, layer->params.fc_params.num_neurons) != 0) {
+            if (load_biases(group_id, layer->biases, layer->params.fc_params.num_neurons) != 0) {
                 return -1;
             }
             break;
@@ -1396,10 +1330,14 @@ void load_vgg16_weights(Model* model, const char* filename) {
         }
 
         char group_name[MAX_GROUP_NAME_LEN];
-        if (get_vgg16_group_name(layer, group_name, MAX_GROUP_NAME_LEN, &conv_block_count, &fc_layer_count) != 0) {
-            fprintf(stderr, "Error generating group name for layer %d\n", i);
-            H5Fclose(file_id);
-            return;
+        if (layer->type == CONVOLUTIONAL || layer->type == FULLY_CONNECTED) {
+            if (get_vgg16_group_name(layer, group_name, MAX_GROUP_NAME_LEN, &conv_block_count, &fc_layer_count) != 0) {
+                fprintf(stderr, "Error generating group name for layer %d\n", i);
+                H5Fclose(file_id);
+                return;
+            }
+        } else {
+            continue;
         }
 
         hid_t group_id = H5Gopen(file_id, group_name, H5P_DEFAULT);

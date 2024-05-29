@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "input/data.h"
 #include "dataset.h"
@@ -16,21 +17,28 @@
 #include "cdnn.h"
 
 // TODO: Define input dimensions
-#define INPUT_WIDTH 224
-#define INPUT_HEIGHT 224
+#define INPUT_WIDTH    224
+#define INPUT_HEIGHT   224
 #define INPUT_CHANNELS 3
 
 int main(int argc, const char * argv[]) {
     // insert code here...
     printf("Hello, World!\n");
+
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("Current Position: %s\n", cwd);
+    } 
+    char fullpath[2048];
     
     // TODO: - Test `data.h`
-    const char *filename = "dataset example/test_data_and_val/0/test.jpeg";
+    char *rel_path = "dataset example/test_data_and_val/0/test.jpeg";
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
     Dimensions new_dimensions;
     new_dimensions.width    = 100;
     new_dimensions.height   = 100;
     new_dimensions.channels = 3;
-    InputData *image_data = load_input_data_from_image(filename, &new_dimensions, FLOAT32);
+    InputData *image_data = load_input_data_from_image(fullpath, &new_dimensions, FLOAT32);
     if (image_data == NULL) {
         fprintf(stderr, "Error: Failed to load the image.\n");
         return 1;
@@ -55,11 +63,14 @@ int main(int argc, const char * argv[]) {
     // Define input dimensions
     Dimensions input_dimensions = {INPUT_WIDTH, INPUT_HEIGHT, INPUT_CHANNELS}; // Example dimensions
 
-    create_dataset_json_file("/Users/precious/Neural Network API/Neural Network API/dataset example/test_data_without_val", 0, 0.5);
+    rel_path = "dataset example/test_data_without_val";
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+
+    create_dataset_json_file(fullpath, 0, 0.5);
 
     // Load dataset from JSON file
     printf("\nLoading dataset from JSON file...\n");
-    Dataset* dataset = load_dataset_from_json("/Users/precious/Neural Network API/Neural Network API/dataset example/test_data_without_val/dataset.json", input_dimensions, INT, 0);
+    Dataset* dataset = load_dataset_from_json("dataset example/test_data_without_val/dataset.json", input_dimensions, INT, 0);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset from JSON file\n");
         return 1;
@@ -68,7 +79,7 @@ int main(int argc, const char * argv[]) {
 
     // Create a new JSON file from dataset
     printf("Creating JSON file from dataset...\n");
-    create_dataset_json_file("/Users/precious/Neural Network API/Neural Network API/dataset example/test_data_and_val", 1, 0);
+    create_dataset_json_file("dataset example/test_data_and_val", 1, 0);
     printf("JSON file created successfully!\n");
 
     // Split dataset into batches
@@ -86,10 +97,10 @@ int main(int argc, const char * argv[]) {
     free_dataset(dataset);
     
     // TODO: - Test MNIST Loading
-//    const char* train_images_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-images-idx3-ubyte.gz";
-//    const char* train_labels_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-labels-idx1-ubyte.gz";
-//    const char* test_images_path  = "/Users/precious/Design_Neural_Network/dataset example/mnist/t10k-images-idx3-ubyte.gz";
-//    const char* test_labels_path  = "/Users/precious/Design_Neural_Network/dataset example/mnist/t10k-labels-idx1-ubyte.gz";
+//    const char* train_images_path = "dataset example/mnist/train-images-idx3-ubyte.gz";
+//    const char* train_labels_path = "dataset example/mnist/train-labels-idx1-ubyte.gz";
+//    const char* test_images_path  = "dataset example/mnist/t10k-images-idx3-ubyte.gz";
+//    const char* test_labels_path  = "dataset example/mnist/t10k-labels-idx1-ubyte.gz";
 //
 //    Dataset* mnist_dataset = load_mnist_dataset(train_images_path, train_labels_path,
 //                                                 test_images_path, test_labels_path, FLOAT32);
@@ -237,7 +248,7 @@ int main(int argc, const char * argv[]) {
     compile_model(model, SGD, 0.01f, MSE, ACCURACY);
 
     // Load dataset
-    dataset = load_dataset_from_json("/Users/precious/Neural Network API/Neural Network API/dataset example/test_data_and_val/dataset.json", input_dim, FLOAT32, 1);
+    dataset = load_dataset_from_json("dataset example/test_data_and_val/dataset.json", input_dim, FLOAT32, 1);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset\n");
         free_model(model);
@@ -272,19 +283,19 @@ int main(int argc, const char * argv[]) {
     
     // Load pre-trained model
     ModelConfig vgg16_config = {"Adam", 0.0003f, "categorical_crossentropy", "accuracy"};
-    Model *vgg16 = load_vgg16("/Users/precious/Design_Neural_Network/VGG16 weights.h5", 1, 1000, vgg16_config);
+    Model *vgg16 = load_vgg16("VGG16 weights.h5", 1, 1000, vgg16_config);
     if (vgg16 == NULL) {
         printf("Error loading VGG16 model\n");
         return 1;
     }
-    save_weights(vgg16, "vgg16_weights.h5");
+    // save_weights(vgg16, "vgg16_weights.h5");
     free_model(vgg16);
 
     // Or Load MNIST dataset directly
-    const char* train_images_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-images-idx3-ubyte.gz";
-    const char* train_labels_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-labels-idx1-ubyte.gz";
-    const char* test_images_path  = "/Users/precious/Design_Neural_Network/dataset example/mnist/t10k-images-idx3-ubyte.gz";
-    const char* test_labels_path  = "/Users/precious/Design_Neural_Network/dataset example/mnist/t10k-labels-idx1-ubyte.gz";
+    const char* train_images_path = "dataset example/mnist/train-images-idx3-ubyte.gz";
+    const char* train_labels_path = "dataset example/mnist/train-labels-idx1-ubyte.gz";
+    const char* test_images_path  = "dataset example/mnist/t10k-images-idx3-ubyte.gz";
+    const char* test_labels_path  = "dataset example/mnist/t10k-labels-idx1-ubyte.gz";
 
     dataset = load_mnist_dataset(train_images_path, train_labels_path,
                                  test_images_path, test_labels_path, FLOAT32);
