@@ -461,10 +461,6 @@ void add_dropout_layer(Model* model, float dropout_rate) {
     add_layer(model, DROPOUT, 0, 0, 0, 0, -1, -1, dropout_rate);
 }
 
-void add_flatten_layer(Model* model) {
-    add_layer(model, FLATTEN, 0, 0, 0, 0, -1, -1, 0.0f);
-}
-
 void add_softmax_layer(Model* model) {
     add_layer(model, ACTIVATION, 0, 0, 0, 0, SOFTMAX, -1, 0.0f);
 }

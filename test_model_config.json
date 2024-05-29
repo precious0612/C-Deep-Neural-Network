@@ -31,9 +31,6 @@
       }
     },
     {
-      "type":"flatten"
-    },
-    {
       "type":"fully_connected",
       "params":{
         "num_neurons":16,

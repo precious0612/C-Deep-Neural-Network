@@ -164,16 +164,6 @@ void add_fully_connected_layer(Model* model, int num_neurons, char* activation);
 ///
 void add_dropout_layer(Model* model, float dropout_rate);
 
-/// Adds a `flatten` layer to the model.
-/// - Parameter model: A pointer to the `Model` struct.
-///
-/// - Example Usage:
-///     ```c
-///     add_flatten_layer(model);
-///     ```
-///
-void add_flatten_layer(Model* model);
-
 /// Adds a `softmax` layer to the model.
 /// - Parameter model: A pointer to the `Model` struct.
 ///

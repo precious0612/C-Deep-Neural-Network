@@ -996,7 +996,15 @@ static herr_t save_layer_weights(hid_t group_id, Layer* layer) {
                 return -1;
             }
             break;
-        // Add other layer types as needed
+        case ACTIVATION:
+            // Activation layer does not have any weights or biases
+            break;
+        case FLATTEN:
+            // Flatten layer does not have any weights or biases
+            break;
+        case DROPOUT:
+            // Dropout layer does not have any weights or biases
+            break;
         default:
             fprintf(stderr, "Error: Unsupported layer type.\n");
             return -1;
