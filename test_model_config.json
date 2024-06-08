@@ -7,8 +7,8 @@
   "output_shape":[
     10
   ],
-  "optimizer":"adam",
-  "learning_rate":0.00030000001424923539,
+  "optimizer":"sgd",
+  "learning_rate":0.0010000000474974513,
   "loss_function":"categorical_crossentropy",
   "metric_name":"accuracy",
   "layers":[
@@ -33,8 +33,14 @@
     {
       "type":"fully_connected",
       "params":{
-        "num_neurons":16,
+        "num_neurons":128,
         "activation":"relu"
+      }
+    },
+    {
+      "type":"dropout",
+      "params":{
+        "dropout_rate":0.5
       }
     },
     {

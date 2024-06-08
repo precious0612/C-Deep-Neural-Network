@@ -517,7 +517,6 @@ Model *load_vgg16(const char *weights_file, int load_pretrained, int num_classes
     add_convolutional_layer(model, 512, 3, 1, 1, "relu");
     add_pooling_layer(model, 2, 2, "max");
 
-    add_flatten_layer(model);
     add_fully_connected_layer(model, 4096, "relu");
     add_dropout_layer(model, 0.5f);
     add_fully_connected_layer(model, 4096, "relu");

@@ -16,25 +16,25 @@
 #include "model/model.h"
 #include "cdnn.h"
 
-#include "input/data.c"
-#include "model/layer/layer.c"
-#include "model/loss/losses.c"
-#include "model/metric/metric.c"
-#include "model/optimizer/optimizer.c"
-#include "model/model.c"
-#include "utils/compute/activation.c"
-#include "utils/compute/convolution.c"
-#include "utils/compute/dropout.c"
-#include "utils/compute/flatten.c"
-#include "utils/compute/fully_connected.c"
-#include "utils/compute/loss_function.c"
-#include "utils/compute/metric_algorithm.c"
-#include "utils/compute/optim_algorithm.c"
-#include "utils/compute/pooling.c"
-#include "utils/memory.c"
-#include "utils/tools.c"
-#include "dataset.c"
-#include "cdnn.c"
+// #include "input/data.c"
+// #include "model/layer/layer.c"
+// #include "model/loss/losses.c"
+// #include "model/metric/metric.c"
+// #include "model/optimizer/optimizer.c"
+// #include "model/model.c"
+// #include "utils/compute/activation.c"
+// #include "utils/compute/convolution.c"
+// #include "utils/compute/dropout.c"
+// #include "utils/compute/flatten.c"
+// #include "utils/compute/fully_connected.c"
+// #include "utils/compute/loss_function.c"
+// #include "utils/compute/metric_algorithm.c"
+// #include "utils/compute/optim_algorithm.c"
+// #include "utils/compute/pooling.c"
+// #include "utils/memory.c"
+// #include "utils/tools.c"
+// #include "dataset.c"
+// #include "cdnn.c"
 
 // TODO: Define input dimensions
 #define INPUT_WIDTH    224
@@ -342,14 +342,12 @@ int main(int argc, const char * argv[]) {
     // Add layers to the model
     add_convolutional_layer(model, 3, 3, 1, 1, "relu");
     add_pooling_layer(model, 2, 2, "max");
-    // add_convolutional_layer(model, 64, 3, 1, 1, "relu");
-    // add_max_pooling_layer(model, 2, 2);
-    add_fully_connected_layer(model, 16, "relu");
-    // add_dropout_layer(model, 0.5f);
+    add_fully_connected_layer(model, 128, "relu");
+    add_dropout_layer(model, 0.5f);
     add_fully_connected_layer(model, 10, "softmax");
 
     // Compile the model
-    ModelConfig config = {"Adam", 0.0003f, "categorical_crossentropy", "accuracy"};
+    ModelConfig config = {"sgd", 0.001f, "categorical_crossentropy", "accuracy"};
     compile(model, config);
 
     // Train the model
@@ -357,7 +355,7 @@ int main(int argc, const char * argv[]) {
 
     // Evaluate the model
     accuracy = evaluate(model, dataset->val_dataset);
-    printf("FInal Validation Accuracy: %.2f%%\n", accuracy * 100.0f);
+    printf("FInal Validation Accuracy: %.f%%\n", accuracy * 100.0f);
 
     // Save the model
     int result = save_model_to_json(model, "/Users/precious/Design_Neural_Network/test_model_config.json");
