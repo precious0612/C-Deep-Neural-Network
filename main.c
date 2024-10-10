@@ -48,9 +48,9 @@ int main(int argc, const char * argv[]) {
     char cwd[1024];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
         printf("Current Position: %s\n", cwd);
-    } 
+    }
     char fullpath[2048];
-    
+
     // TODO: - Test `data.h`
     char *rel_path = "dataset example/test_data_and_val/0/test.jpeg";
     snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
@@ -59,12 +59,12 @@ int main(int argc, const char * argv[]) {
     new_dimensions.height   = 100;
     new_dimensions.channels = 3;
     // InputData *image_data = load_input_data_from_image(fullpath, &new_dimensions, FLOAT32);
-    InputData *image_data = load_input_data_from_image("/Users/precious/Design_Neural_Network/dataset example/test_data_and_val/0/test.jpeg", &new_dimensions, FLOAT32);
+    InputData *image_data = load_input_data_from_image("/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/test_data_and_val/0/test.jpeg", &new_dimensions, FLOAT32);
     if (image_data == NULL) {
         fprintf(stderr, "Error: Failed to load the image.\n");
         return 1;
     }
-    
+
     printf("Loading Successful!\n");
 
     // print the first two line
@@ -79,16 +79,16 @@ int main(int argc, const char * argv[]) {
     free_image_data(image_data, new_dimensions, INT);
 
     printf("Image processing completed successfully.\n");
-    
+
     // TODO: - Test `dataset.h`
     // Define input dimensions
     Dimensions input_dimensions = {INPUT_WIDTH, INPUT_HEIGHT, INPUT_CHANNELS}; // Example dimensions
 
-    create_dataset_json_file("/Users/precious/Design_Neural_Network/dataset example/test_data_without_val", 0, 0.5);
+    create_dataset_json_file("/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/test_data_without_val", 0, 0.5);
 
     // Load dataset from JSON file
     printf("\nLoading dataset from JSON file...\n");
-    Dataset* dataset = load_dataset_from_json("/Users/precious/Design_Neural_Network/dataset example/test_data_without_val/dataset.json", input_dimensions, INT, 0);
+    Dataset* dataset = load_dataset_from_json("/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/test_data_without_val/dataset.json", input_dimensions, INT, 0);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset from JSON file\n");
         return 1;
@@ -97,7 +97,7 @@ int main(int argc, const char * argv[]) {
 
     // Create a new JSON file from dataset
     printf("Creating JSON file from dataset...\n");
-    create_dataset_json_file("/Users/precious/Design_Neural_Network/dataset example/test_data_and_val", 1, 0);
+    create_dataset_json_file("/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/test_data_and_val", 1, 0);
     printf("JSON file created successfully!\n");
 
     // Split dataset into batches
@@ -113,7 +113,7 @@ int main(int argc, const char * argv[]) {
 
     // Free dataset memory
     free_dataset(dataset);
-    
+
     // TODO: - Test MNIST Loading
 //    const char* train_images_path = "dataset example/mnist/train-images-idx3-ubyte.gz";
 //    const char* train_labels_path = "dataset example/mnist/train-labels-idx1-ubyte.gz";
@@ -129,9 +129,9 @@ int main(int argc, const char * argv[]) {
 //
 //    // Free the dataset
 //    free_dataset(mnist_dataset);
-    
+
     // TODO: Test the `layer.h`
-    
+
 //    // Create a convolutional layer
 //    LayerParams conv_params;
 //    conv_params.conv_params.num_filters = 256;
@@ -248,16 +248,16 @@ int main(int argc, const char * argv[]) {
 //    delete_layer(activation_layer);
 //    delete_layer(pool_layer);
 //    delete_layer(fc_layer);
-    
+
     // TODO: - Test `model.h` file
-    
+
     // Define input and output dimensions
     Dimensions input_dim = {28, 28, 3};
     Dimensions output_dim = {1, 1, 10};
 
     // Create a new model
     Model* model = create_model(input_dim, output_dim);
-    
+
     add_layer(model, CONVOLUTIONAL,   32, 3, 1, 1, RELU,    0,   0.0f);
     add_layer(model, POOLING,         0,  2, 2, 0, 0,       MAX, 0.0f);
     add_layer(model, FULLY_CONNECTED, 10, 0, 0, 0, SOFTMAX, 0,   0.0f);
@@ -266,7 +266,7 @@ int main(int argc, const char * argv[]) {
     compile_model(model, SGD, 0.01f, MSE, ACCURACY);
 
     // Load dataset
-    dataset = load_dataset_from_json("/Users/precious/Design_Neural_Network/dataset example/test_data_and_val/dataset.json", input_dim, FLOAT32, 1);
+    dataset = load_dataset_from_json("/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/test_data_and_val/dataset.json", input_dim, FLOAT32, 1);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset\n");
         free_model(model);
@@ -296,24 +296,24 @@ int main(int argc, const char * argv[]) {
     free_dataset(dataset);
     free_dataset(splited_dataset);
     delete_model(model);
-    
+
     // TODO: - Test the APIs
-    
+
     // Load pre-trained model
     ModelConfig vgg16_config = {"Adam", 0.0003f, "categorical_crossentropy", "accuracy"};
-    Model *vgg16 = load_vgg16("/Users/precious/Design_Neural_Network/VGG16 weights.h5", 1, 1000, vgg16_config);
+    Model *vgg16 = load_vgg16("/Users/precious/Github_projects/precious/Design_Neural_Network/VGG16 weights.h5", 1, 1000, vgg16_config);
     if (vgg16 == NULL) {
         printf("Error loading VGG16 model\n");
         return 1;
     }
-    save_weights(vgg16, "/Users/precious/Design_Neural_Network/vgg16_weights.h5");
+    save_weights(vgg16, "/Users/precious/Github_projects/precious/Design_Neural_Network/vgg16_weights.h5");
     free_model(vgg16);
 
     // Or Load MNIST dataset directly
-    const char* train_images_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-images-idx3-ubyte.gz";
-    const char* train_labels_path = "/Users/precious/Design_Neural_Network/dataset example/mnist/train-labels-idx1-ubyte.gz";
-    const char* test_images_path  = "/Users/precious/Design_Neural_Network/dataset example/mnist/t10k-images-idx3-ubyte.gz";
-    const char* test_labels_path  = "/Users/precious/Design_Neural_Network/dataset example/mnist/t10k-labels-idx1-ubyte.gz";
+    const char* train_images_path = "/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/mnist/train-images-idx3-ubyte.gz";
+    const char* train_labels_path = "/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/mnist/train-labels-idx1-ubyte.gz";
+    const char* test_images_path  = "/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/mnist/t10k-images-idx3-ubyte.gz";
+    const char* test_labels_path  = "/Users/precious/Github_projects/precious/Design_Neural_Network/dataset example/mnist/t10k-labels-idx1-ubyte.gz";
 
     dataset = load_mnist_dataset(train_images_path, train_labels_path,
                                  test_images_path, test_labels_path, FLOAT32);
@@ -358,19 +358,19 @@ int main(int argc, const char * argv[]) {
     printf("FInal Validation Accuracy: %.f%%\n", accuracy * 100.0f);
 
     // Save the model
-    int result = save_model_to_json(model, "/Users/precious/Design_Neural_Network/test_model_config.json");
+    int result = save_model_to_json(model, "/Users/precious/Github_projects/precious/Design_Neural_Network/test_model_config.json");
     if (result != 0) {
         printf("Error saving model\n");
     }
 
-    Model* model2 = create_model_from_json("/Users/precious/Design_Neural_Network/model_config.json");
+    Model* model2 = create_model_from_json("/Users/precious/Github_projects/precious/Design_Neural_Network/model_config.json");
 
     // Free memory
     free_model(model);
     free_model(model2);
     free_dataset(dataset);
     free_dataset(splited_dataset);
-    
+
     return 0;
 }
- 
+

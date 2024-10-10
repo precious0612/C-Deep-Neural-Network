@@ -13,7 +13,7 @@ CFLAGS += -Wall -Wextra
 ifeq ($(UNAME), Linux)
     LDFLAGS += -L/usr/local/lib
 else ifeq ($(UNAME), Darwin)
-    LDFLAGS += -L/opt/homebrew/Cellar/json-c/0.17/lib -L/opt/homebrew/Cellar/jpeg-turbo/3.0.2/lib -L/opt/homebrew/opt/libpng/lib -L/opt/homebrew/Cellar/hdf5/1.14.3_1/lib
+    LDFLAGS += -L/opt/homebrew/Cellar/json-c/0.17/lib -L/opt/homebrew/Cellar/jpeg-turbo/3.0.4/lib -L/opt/homebrew/opt/libpng/lib -L/opt/homebrew/Cellar/hdf5/1.14.3_1/lib
 endif
 LDLIBS = -ljson-c -lturbojpeg -lpng16 -lz -lhdf5 -lopenblas
 
@@ -21,7 +21,7 @@ LDLIBS = -ljson-c -lturbojpeg -lpng16 -lz -lhdf5 -lopenblas
 ifeq ($(UNAME), Linux)
     CFLAGS += -I/usr/local/include
 else ifeq ($(UNAME), Darwin)
-    CFLAGS += -I/usr/local/include/stb -I/opt/homebrew/Cellar/json-c/0.17/include -I/opt/homebrew/Cellar/json-c/0.17/include/json-c -I/opt/homebrew/Cellar/jpeg-turbo/3.0.2/include -I/opt/homebrew/opt/libpng/include/libpng16 -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include
+    CFLAGS += -I/usr/local/include/stb -I/opt/homebrew/Cellar/json-c/0.17/include -I/opt/homebrew/Cellar/json-c/0.17/include/json-c -I/opt/homebrew/Cellar/jpeg-turbo/3.0.4/include -I/opt/homebrew/opt/libpng/include/libpng16 -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include
 endif
 
 # 设置目标文件扩展名
