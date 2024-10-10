@@ -1,8 +1,11 @@
 # Check for Windows and use appropriate commands
 ifeq ($(OS), Windows_NT)
-    UNAME_S := Windows
+    UNAME := Windows
+    CC := clang
+    PROJECT_PATH := $(shell cd)
 else
     UNAME := $(shell uname -s)
+    PROJECT_PATH := $(shell pwd)
 endif
 
 # 设置编译器标志
@@ -15,7 +18,7 @@ else
     CFLAGS += -D_WINDOWS
 endif
 
-CFLAGS += -Wall -Wextra -DPROJECT_PATH=\"$(shell pwd)\"
+CFLAGS += -Wall -Wextra -DPROJECT_PATH=\"$(PROJECT_PATH)\"
 
 # 设置库链接路径
 ifeq ($(UNAME), Linux)
