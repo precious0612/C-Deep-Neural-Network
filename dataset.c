@@ -18,9 +18,9 @@
 #include <libgen.h>
 
 static int load_images_from_json_array(Dataset* dataset, json_object* images_array, Dimensions input_dimension, DataType data_type) {
-    
+
     int array_len = (int)json_object_array_length(images_array);
-    
+
     // Check if dataset->images is NULL
     if (dataset->images == NULL) {
        // dataset->images is NULL, allocate memory
@@ -64,7 +64,7 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
         fprintf(stderr, "Error: Unable to open file %s\n", file_path);
         return NULL;
     }
-    
+
     // Read the JSON file content
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
@@ -84,7 +84,7 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
     }
     fclose(file);
     json_buffer[file_size] = '\0';
-    
+
     // Parse JSON
     json_object* root = json_tokener_parse(json_buffer);
     free(json_buffer);
@@ -93,7 +93,7 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
         fprintf(stderr, "Error: Unable to parse JSON\n");
         return NULL;
     }
-    
+
     // Calculate total steps for progress bar
     int total_steps = 5; // Initial steps
     json_object* num_images_obj = json_object_object_get(root, "num_images");
@@ -110,7 +110,7 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
     }
 
     int current_step = 0;
-    
+
     // Allocate memory for Dataset struct
     Dataset* dataset = create_dataset(NULL, 0, input_dimension, data_type);
     if (dataset == NULL) {
@@ -118,7 +118,7 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
         json_object_put(root);
         return NULL;
     }
-    
+
     // Read dataset information from JSON object
     json_object* dataset_name_obj = json_object_object_get(root, "dataset_name");
     if (dataset_name_obj != NULL) {
@@ -131,14 +131,14 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
             return NULL;
         }
     }
-    
+
     current_step++;
     print_progress_bar((float)current_step / total_steps, 50);
-    
+
     if (num_images_obj != NULL) {
         dataset->num_images = json_object_get_int(num_images_obj);
         dataset->batch_size = dataset->num_images;
-        
+
         // Allocate memory for images and labels
         dataset->images = (InputData**)malloc(dataset->num_images * sizeof(InputData*));
         dataset->labels = (int*)calloc(dataset->num_images, sizeof(int));
@@ -161,7 +161,7 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
             print_progress_bar((float)current_step / total_steps, 50);
         }
     }
-    
+
     // Read validation dataset information
     if (include_val_dataset) {
         json_object* val_dataset_obj = json_object_object_get(root, "val_dataset");
@@ -253,10 +253,10 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
             train_dataset = NULL;
         }
     }
-    
+
     // Cleanup
     json_object_put(root);
-    
+
     print_dataset_info(dataset);
 
     return dataset;
@@ -284,13 +284,13 @@ static int write_images_to_json(FILE* file, const char* folder_path, const char*
 }
 
 void create_dataset_json_file(const char* folder_path, int include_val_dataset, float validation_size) {
-    
+
     // Check if the folder path is valid
     if (folder_path == NULL || strlen(folder_path) == 0) {
         fprintf(stderr, "Error: Invalid folder path\n");
         return;
     }
-    
+
     // Open the folder
     DIR* dir = opendir(folder_path);
     if (dir == NULL) {
@@ -437,8 +437,8 @@ void create_dataset_json_file(const char* folder_path, int include_val_dataset, 
     free(path);
     fclose(file);
     closedir(dir);
-    
-    printf("Create JSON file of '%s' successfully!\n", folder_path);
+
+    printf("Create JSON file of '%s' successfully!\n", json_file_path);
 }
 
 Dataset* create_dataset(const char* name, int num_images, Dimensions input_dimensions, DataType data_type) {
@@ -462,7 +462,7 @@ Dataset* create_dataset(const char* name, int num_images, Dimensions input_dimen
     dataset->num_images = num_images;
     dataset->data_dimensions = input_dimensions;
     dataset->data_type = data_type;
-    
+
     if (num_images != 0) {
         dataset->images = (InputData**)malloc(num_images * sizeof(InputData*));
         dataset->labels = (int*)calloc(num_images, sizeof(int));
@@ -540,7 +540,7 @@ Dataset* split_dataset_into_batches(Dataset* original_dataset, int num_batches) 
         if (original_dataset->labels != NULL) {
             memcpy(batch->labels, &original_dataset->labels[start_index], batch_size * sizeof(int));
         }
-        
+
 
         // Update start index for the next batch
         start_index += batch_size;
@@ -563,7 +563,7 @@ void print_dataset_info(Dataset* dataset) {
         printf("The dataset is NULL\n");
         return;
     }
-    
+
     printf("\nLoaded dataset:\n");
     printf("  Name:                    %s\n", dataset->name);
     printf("  Dimensions:              %d x %d x %d\n", dataset->data_dimensions.width, dataset->data_dimensions.height, dataset->data_dimensions.channels);
@@ -585,18 +585,18 @@ Dataset* copy_dataset(Dataset* original_dataset) {
     if (original_dataset == NULL) {
         return NULL;
     }
-    
+
     Dataset* dataset = create_dataset(original_dataset->name, original_dataset->num_images, original_dataset->data_dimensions, original_dataset->data_type);
     if (dataset == NULL) {
         fprintf(stderr, "Allocating new dataset failed\n");
         return NULL;
     }
-    
+
     Dataset* temp = dataset;
     Dataset* current = original_dataset;
     while (current != NULL) {
         Dataset* next = current->next_batch;
-        
+
         if (current->images != NULL) {
             for (int i = 0; i < current->num_images; ++i) {
                 temp->images[i] = copy_image_data(current->images[i], current->data_dimensions, current->data_type);
@@ -607,11 +607,11 @@ Dataset* copy_dataset(Dataset* original_dataset) {
                 }
             }
         }
-        
+
         if (current->labels != NULL) {
             memcpy(temp->labels, current->labels, current->num_images * sizeof(int));
         }
-        
+
         if (current->val_dataset != NULL && current->val_dataset != current) {
             temp->val_dataset = copy_dataset(current->val_dataset);
             if (temp->val_dataset == NULL) {
@@ -620,7 +620,7 @@ Dataset* copy_dataset(Dataset* original_dataset) {
                 return NULL;
             }
         }
-        
+
         if (current->next_batch != NULL) {
             temp->next_batch = create_dataset(next->name, next->num_images, next->data_dimensions, next->data_type);
             if (temp->next_batch == NULL) {
@@ -629,11 +629,11 @@ Dataset* copy_dataset(Dataset* original_dataset) {
                 return NULL;
             }
         }
-        
+
         temp = temp->next_batch;
         current = next;
     }
-    
+
     return dataset;
 }
 
@@ -642,7 +642,7 @@ void free_dataset(Dataset* dataset) {
         printf("Dataset is NULL\n");
         return;
     }
-    
+
     Dataset* current = dataset;
     while (current != NULL) {
         Dataset* next = current->next_batch;
@@ -678,7 +678,7 @@ void free_dataset(Dataset* dataset) {
             }
         }
         current->val_dataset = NULL;
-        
+
         Dataset* temp = current;
         current = next;
         free(temp);
@@ -948,9 +948,9 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
         train_labels = NULL;
         return NULL;
     }
-    
+
     Dimensions input_dimension = {MNIST_IMAGE_WIDTH, MNIST_IMAGE_HEIGHT, MNIST_IMAGE_CHANNEL};
-    
+
     Dataset* dataset = create_dataset("MNIST", num_train_images, input_dimension, data_type);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Memory allocation failed\n");
@@ -1004,7 +1004,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
         free_dataset(dataset);
         return NULL;
     }
-    
+
     dataset->val_dataset = create_dataset("MNIST Test", num_test_images, input_dimension, data_type);
 
     if (dataset->val_dataset == NULL) {
@@ -1038,7 +1038,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     test_labels = NULL;
     free_mnist_images(test_images, data_type);
     test_images = NULL;
-    
+
     print_dataset_info(dataset);
 
     return dataset;
