@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+// #include <unistd.h>
 
 #include "input/data.h"
 #include "dataset.h"
@@ -37,6 +37,8 @@
 // #include "dataset.c"
 // #include "cdnn.c"
 
+#define CURRENT_FILE_PATH __FILE__
+
 // TODO: Define input dimensions
 #define INPUT_WIDTH    224
 #define INPUT_HEIGHT   224
@@ -46,15 +48,12 @@ int main(int argc, const char * argv[]) {
     // insert code here...
     printf("Hello, World!\n");
 
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        printf("Current Position: %s\n", cwd);
-    }
+    printf("Current Position: %s\n", PROJECT_PATH);
     char fullpath[2048];
 
     // TODO: - Test `data.h`
     char rel_path[1024] = "dataset example/test_data_and_val/0/test.jpeg";
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     Dimensions new_dimensions;
     new_dimensions.width    = 100;
     new_dimensions.height   = 100;
@@ -85,13 +84,13 @@ int main(int argc, const char * argv[]) {
     Dimensions input_dimensions = {INPUT_WIDTH, INPUT_HEIGHT, INPUT_CHANNELS}; // Example dimensions
 
     strcpy(rel_path, "dataset example/test_data_without_val");
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     create_dataset_json_file(fullpath, 0, 0.5);
 
     // Load dataset from JSON file
     printf("\nLoading dataset from JSON file...\n");
     strcpy(rel_path, "dataset example/test_data_without_val/dataset.json");
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     Dataset* dataset = load_dataset_from_json(fullpath, input_dimensions, INT, 0);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset from JSON file\n");
@@ -102,7 +101,7 @@ int main(int argc, const char * argv[]) {
     // Create a new JSON file from dataset
     printf("Creating JSON file from dataset...\n");
     strcpy(rel_path, "dataset example/test_data_and_val");
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     create_dataset_json_file(fullpath, 1, 0);
     printf("JSON file created successfully!\n");
 
@@ -273,7 +272,7 @@ int main(int argc, const char * argv[]) {
 
     // Load dataset
     strcpy(rel_path, "dataset example/test_data_and_val/dataset.json");
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     dataset = load_dataset_from_json(fullpath, input_dim, FLOAT32, 1);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset\n");
@@ -310,14 +309,14 @@ int main(int argc, const char * argv[]) {
     // Load pre-trained model
     ModelConfig vgg16_config = {"Adam", 0.0003f, "categorical_crossentropy", "accuracy"};
     strcpy(rel_path, "VGG16 weights.h5");
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     Model *vgg16 = load_vgg16(fullpath, 1, 1000, vgg16_config);
     if (vgg16 == NULL) {
         printf("Error loading VGG16 model\n");
         return 1;
     }
     strcpy(rel_path, "vgg16_weights.h5");
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     save_weights(vgg16, fullpath);
     free_model(vgg16);
 
@@ -332,10 +331,10 @@ int main(int argc, const char * argv[]) {
     char test_images_path[2048];
     char test_labels_path[2048];
 
-    snprintf(train_images_path, sizeof(train_images_path), "%s%s", cwd, train_images_rel);
-    snprintf(train_labels_path, sizeof(train_labels_path), "%s%s", cwd, train_labels_rel);
-    snprintf(test_images_path, sizeof(test_images_path), "%s%s", cwd, test_images_rel);
-    snprintf(test_labels_path, sizeof(test_labels_path), "%s%s", cwd, test_labels_rel);
+    snprintf(train_images_path, sizeof(train_images_path), "%s%s", PROJECT_PATH, train_images_rel);
+    snprintf(train_labels_path, sizeof(train_labels_path), "%s%s", PROJECT_PATH, train_labels_rel);
+    snprintf(test_images_path, sizeof(test_images_path), "%s%s", PROJECT_PATH, test_images_rel);
+    snprintf(test_labels_path, sizeof(test_labels_path), "%s%s", PROJECT_PATH, test_labels_rel);
 
     dataset = load_mnist_dataset(train_images_path, train_labels_path,
                                  test_images_path, test_labels_path, FLOAT32);
@@ -381,14 +380,14 @@ int main(int argc, const char * argv[]) {
 
     // Save the model
     strcpy(rel_path, "test_model_config.json");
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     int result = save_model_to_json(model, fullpath);
     if (result != 0) {
         printf("Error saving model\n");
     }
 
     strcpy(rel_path, "model_config.json");
-    snprintf(fullpath, sizeof(fullpath), "%s/%s", cwd, rel_path);
+    snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
     Model* model2 = create_model_from_json(fullpath);
 
     // Free memory

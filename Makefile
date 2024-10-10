@@ -11,7 +11,7 @@ else
     CFLAGS += -D_WINDOWS
 endif
 
-CFLAGS += -Wall -Wextra
+CFLAGS += -Wall -Wextra -DPROJECT_PATH=\"$(shell pwd)\"
 
 # 设置库链接路径
 ifeq ($(UNAME), Linux)
