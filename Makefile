@@ -6,7 +6,11 @@ ifeq ($(UNAME), Linux)
     CFLAGS += -D_POSIX_C_SOURCE=200809L
 else ifeq ($(UNAME), Darwin)
     CFLAGS += -D_DARWIN_C_SOURCE
+else
+    # Windows 系统的编译器标志
+    CFLAGS += -D_WINDOWS
 endif
+
 CFLAGS += -Wall -Wextra
 
 # 设置库链接路径
@@ -14,7 +18,12 @@ ifeq ($(UNAME), Linux)
     LDFLAGS += -L/usr/local/lib
 else ifeq ($(UNAME), Darwin)
     LDFLAGS += -L/opt/homebrew/Cellar/json-c/0.17/lib -L/opt/homebrew/Cellar/jpeg-turbo/3.0.4/lib -L/opt/homebrew/opt/libpng/lib -L/opt/homebrew/Cellar/hdf5/1.14.3_1/lib
+else
+    # Windows 系统的库链接路径（根据实际需要调整）
+    LDFLAGS += -L"C:/path/to/your/libs"
 endif
+
+# 链接库
 LDLIBS = -ljson-c -lturbojpeg -lpng16 -lz -lhdf5 -lopenblas
 
 # 设置头文件路径
@@ -22,6 +31,9 @@ ifeq ($(UNAME), Linux)
     CFLAGS += -I/usr/local/include
 else ifeq ($(UNAME), Darwin)
     CFLAGS += -I/usr/local/include/stb -I/opt/homebrew/Cellar/json-c/0.17/include -I/opt/homebrew/Cellar/json-c/0.17/include/json-c -I/opt/homebrew/Cellar/jpeg-turbo/3.0.4/include -I/opt/homebrew/opt/libpng/include/libpng16 -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include
+else
+    # Windows 系统的头文件路径（根据实际需要调整）
+    CFLAGS += -I"C:/path/to/your/includes"
 endif
 
 # 设置目标文件扩展名
@@ -51,7 +63,7 @@ main$(OBJ_EXT): main.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS)
+	rm -f $(OBJECTS) main.exe
 
 run_example: $(EXAMPLE_EXECUTABLE)
 	./$(EXAMPLE_EXECUTABLE)
