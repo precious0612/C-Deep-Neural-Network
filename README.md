@@ -15,7 +15,7 @@ How to run the test example? (After cloning the project...)
 ```shell
 make clean && make && make run_example
 ```
-**(Notice: You need to install `libpng`, `libjpeg-turbo`, `stb_image`, `openblas`, `hdf5`, `json-c`)**
+**(Notice: You need to install `libpng`, `libjpeg-turbo`, `stb_image`, `openblas`, `hdf5`, `json-c`, `dirent`(for Windows), `build-essential`(for Linux))**
 
 ## Project Introduction
 
