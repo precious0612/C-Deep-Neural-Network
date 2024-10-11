@@ -57,16 +57,28 @@ else
 endif
 
 # Handle path conversion for Windows (use backslashes for file paths)
-ifeq ($(OS), Windows_NT)
+ifeq ($(UNAME), Windows)
     # Convert slashes in SOURCES to backslashes for Windows compatibility
-    SOURCES := $(subst /,\\,$(SOURCES))
+    SOURCES := $(filter-out $(PROJECT_PATH)\\main.c,
+               $(wildcard $(PROJECT_PATH)\\*.c
+               $(PROJECT_PATH)\\input\\data.c
+               $(PROJECT_PATH)\\model\\model.c
+               $(PROJECT_PATH)\\model\\layer\\layer.c
+               $(PROJECT_PATH)\\model\\loss\\losses.c
+               $(PROJECT_PATH)\\model\\metric\\metric.c
+               $(PROJECT_PATH)\\model\\optimizer\\optimizer.c
+               $(PROJECT_PATH)\\utils\\*.c
+               $(PROJECT_PATH)\\utils\\compute\\*.c))
+else
+    SOURCES = $(filter-out main.c, $(wildcard *.c input/data.c model/model.c model/layer/layer.c model/loss/losses.c model/metric/metric.c model/optimizer/optimizer.c utils/*.c utils/compute/*.c))
 endif
-
-# 排除 main.c
-SOURCES = $(filter-out main.c, $(wildcard *.c input/data.c model/model.c model/layer/layer.c model/loss/losses.c model/metric/metric.c model/optimizer/optimizer.c utils/*.c utils/compute/*.c))
 OBJECTS = $(patsubst %.c, %$(OBJ_EXT), $(SOURCES))
 HEADERS = $(wildcard *.h input/*.h model/*.h model/layer/*.h model/loss/*.h model/metric/*.h model/optimizer/*.h utils/*.h utils/compute/*.h)
-EXAMPLE_EXECUTABLE = main
+ifeq ($(UNAME), Windows)
+    EXAMPLE_EXECUTABLE = main.exe
+else
+    EXAMPLE_EXECUTABLE = main
+endif
 
 all: $(EXAMPLE_EXECUTABLE)
 
@@ -80,7 +92,7 @@ main$(OBJ_EXT): main.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS) main.exe
+	rm -f $(OBJECTS) $(EXAMPLE_EXECUTABLE)
 
 run_example: $(EXAMPLE_EXECUTABLE)
 	./$(EXAMPLE_EXECUTABLE)
