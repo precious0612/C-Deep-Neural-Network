@@ -58,6 +58,10 @@ OBJECTS = $(patsubst %.c, %$(OBJ_EXT), $(SOURCES))
 HEADERS = $(wildcard *.h input/*.h model/*.h model/layer/*.h model/loss/*.h model/metric/*.h model/optimizer/*.h utils/*.h utils/compute/*.h)
 EXAMPLE_EXECUTABLE = main
 
+ifeq ($(OS), Windows_NT)
+    SOURCES := $(shell echo $(SOURCES) | sed 's/\\/\//g')
+endif
+
 all: $(EXAMPLE_EXECUTABLE)
 
 $(EXAMPLE_EXECUTABLE): main$(OBJ_EXT) $(OBJECTS)
