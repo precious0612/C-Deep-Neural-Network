@@ -59,7 +59,7 @@ endif
 # Handle path conversion for Windows (use backslashes for file paths)
 ifeq ($(UNAME), Windows)
     # Convert slashes in SOURCES to backslashes for Windows compatibility
-    SOURCES := $(filter-out $(PROJECT_PATH)\\main.c, $(wildcard $(PROJECT_PATH)\\*.c $(PROJECT_PATH)\\input\\data.c $(PROJECT_PATH)\\model\\model.c $(PROJECT_PATH)\\model\\layer\\layer.c $(PROJECT_PATH)\\model\\loss\\losses.c $(PROJECT_PATH)\\model\\metric\\metric.c $(PROJECT_PATH)\\model\\optimizer\\optimizer.c $(PROJECT_PATH)\\utils\\*.c $(PROJECT_PATH)\\utils\\compute\\*.c))
+    SOURCES := $(filter-out $(PROJECT_PATH)\main.c, $(wildcard $(PROJECT_PATH)\*.c $(PROJECT_PATH)\input\data.c $(PROJECT_PATH)\model\model.c $(PROJECT_PATH)\model\layer\layer.c $(PROJECT_PATH)\model\loss\losses.c $(PROJECT_PATH)\model\metric\metric.c $(PROJECT_PATH)\model\optimizer\optimizer.c $(PROJECT_PATH)\utils\*.c $(PROJECT_PATH)\utils\compute\*.c))
     SOURCES := $(subst \,\\,$(SOURCES))
 else
     SOURCES = $(filter-out main.c, $(wildcard *.c input/data.c model/model.c model/layer/layer.c model/loss/losses.c model/metric/metric.c model/optimizer/optimizer.c utils/*.c utils/compute/*.c))
