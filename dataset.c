@@ -567,14 +567,14 @@ void print_dataset_info(Dataset* dataset) {
     printf("\nLoaded dataset:\n");
     printf("  Name:                    %s\n", dataset->name);
     printf("  Dimensions:              %d x %d x %d\n", dataset->data_dimensions.width, dataset->data_dimensions.height, dataset->data_dimensions.channels);
-    printf("  Data Type:               %s\n", dataset->data_type == UINT32? "UINT8" : "FLOAT32");
+    printf("  Data Type:               %s\n", dataset->data_type == SINT32? "UINT8" : "FLOAT32");
 
     if (dataset->val_dataset != NULL) {
         printf("  Training Set Size:       %d\n", dataset->num_images);
         printf("  Validation Dataset Name: %s\n", dataset->val_dataset->name);
         printf("  Number of Images:        %d\n", dataset->val_dataset->num_images);
         printf("  Input Dimensions:        %dx%d, Channels: %d\n", dataset->val_dataset->data_dimensions.width, dataset->val_dataset->data_dimensions.height, dataset->val_dataset->data_dimensions.channels);
-        printf("  Data Type:               %s\n", dataset->val_dataset->data_type == UINT32 ? "UINT32" : "FLOAT32");
+        printf("  Data Type:               %s\n", dataset->val_dataset->data_type == SINT32 ? "SINT32" : "FLOAT32");
         printf("  Test Set Size:           %d\n", dataset->val_dataset->num_images);
     } else {
         printf("  Training Set Size:       %d\n", dataset->num_images);
@@ -688,7 +688,7 @@ void free_dataset(Dataset* dataset) {
 
 static void free_mnist_images(void** images, DataType type) {
     switch (type) {
-        case UINT32:
+        case SINT32:
             free_2d_int_array((int**)images);
             break;
         case FLOAT32:
@@ -930,7 +930,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     void** train_images = NULL;
     uint8_t* train_labels = NULL;
 
-    if (data_type == UINT32) {
+    if (data_type == SINT32) {
         train_images = (void**)load_mnist_images_int(train_images_path, &num_train_images);
         train_labels = load_mnist_labels(train_labels_path, &num_train_labels);
     } else if (data_type == FLOAT32) {
@@ -964,7 +964,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     printf("\nLoading training data: ");
     for (int i = 0; i < num_train_images; ++i) {
         dataset->images[i] = (InputData*)malloc(sizeof(InputData));
-        if (data_type == UINT32) {
+        if (data_type == SINT32) {
             dataset->images[i]->int_data = calloc_3d_int_array(MNIST_IMAGE_WIDTH, MNIST_IMAGE_HEIGHT, MNIST_IMAGE_CHANNEL);
             int* int_data_p = &dataset->images[i]->int_data[0][0][0];
             memcpy(int_data_p, (int*)train_images[i], MNIST_IMAGE_SIZE * sizeof(int));
@@ -988,7 +988,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     void** test_images = NULL;
     uint8_t* test_labels = NULL;
 
-    if (data_type == UINT32) {
+    if (data_type == SINT32) {
         test_images = (void**)load_mnist_images_int(test_images_path, &num_test_images);
         test_labels = load_mnist_labels(test_labels_path, &num_test_labels);
     } else {
@@ -1019,7 +1019,7 @@ Dataset* load_mnist_dataset(const char* train_images_path, const char* train_lab
     printf("Loading test data: ");
     for (int i = 0; i < num_test_images; i++) {
         dataset->val_dataset->images[i] = (InputData*)malloc(sizeof(InputData));
-        if (data_type == UINT32) {
+        if (data_type == SINT32) {
             dataset->val_dataset->images[i]->int_data = calloc_3d_int_array(MNIST_IMAGE_WIDTH, MNIST_IMAGE_HEIGHT, MNIST_IMAGE_CHANNEL);
             int* int_val_data_p = &dataset->val_dataset->images[i]->int_data[0][0][0];
             memcpy(int_val_data_p, (int*)test_images[i], MNIST_IMAGE_SIZE * sizeof(int));

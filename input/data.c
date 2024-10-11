@@ -558,7 +558,7 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
             if (data_type == FLOAT32) {
                 image_data->float32_data = loadFloatJPEG(filename, &image_dimensions.width, &image_dimensions.height);
                 load_success = (image_data->float32_data != NULL);
-            }else if (data_type == UINT32) {
+            }else if (data_type == SINT32) {
                 image_data->int_data = loadIntJPEG(filename, &image_dimensions.width, &image_dimensions.height);
                 load_success = (image_data->int_data != NULL);
             }
@@ -568,7 +568,7 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
             if (data_type == FLOAT32) {
                 image_data->float32_data = loadFloatPNG(filename, &image_dimensions.width, &image_dimensions.height);
                 load_success = (image_data->float32_data != NULL);
-            } else if (data_type == UINT32) {
+            } else if (data_type == SINT32) {
                 image_data->int_data = loadIntPNG(filename, &image_dimensions.width, &image_dimensions.height);
                 load_success = (image_data->int_data != NULL);
             }
@@ -583,7 +583,7 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
             if (data_type == FLOAT32) {
                 image_data->float32_data = loadFloatImage(filename, &image_dimensions.width, &image_dimensions.height, &image_dimensions.channels);
                 load_success = (image_data->float32_data != NULL);
-            } else if (data_type == UINT32) {
+            } else if (data_type == SINT32) {
                 image_data->int_data = loadIntImage(filename, &image_dimensions.width, &image_dimensions.height, &image_dimensions.channels);
                 load_success = (image_data->int_data != NULL);
             }
@@ -601,7 +601,7 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
         // Handle error loading image data
         if (data_type == FLOAT32) {
             fprintf(stderr, "Error loading image data as float array\n");
-        } else if (data_type == UINT32) {
+        } else if (data_type == SINT32) {
             fprintf(stderr, "Error loading image data as int array\n");
         }
         free(image_data);
@@ -642,7 +642,7 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
 
     // Allocate memory for pixel values based on data type and dimensions
     switch(data_type) {
-        case UINT32:
+        case SINT32:
             image_data->int_data = calloc_3d_int_array(width, height, channels);
             if (image_data->int_data == NULL) {
                 // Handle memory allocation error
@@ -727,7 +727,7 @@ int resize_image(InputData **image_data_ptr, const Dimensions original_dimension
                 float dy = source_y - y0;
 
                 // Calculate the interpolated value based on data type
-                if (data_type == UINT32) {
+                if (data_type == SINT32) {
                     int top_left = image_data->int_data[y0][x0][c];
                     int top_right = image_data->int_data[y0][x1][c];
                     int bottom_left = image_data->int_data[y1][x0][c];
@@ -769,7 +769,7 @@ InputData* copy_image_data(InputData* src, Dimensions dimensions, DataType data_
     }
 
     switch (data_type) {
-        case UINT32:
+        case SINT32:
             dst->int_data = copy_3d_int_array(src->int_data, dimensions.width, dimensions.height, dimensions.channels);
             if (dst->int_data == NULL) {
                 free(dst);
@@ -797,7 +797,7 @@ void free_image_data(InputData *image_data, Dimensions dimensions, DataType data
 
     // Free allocated memory for pixel values
     switch(data_type) {
-        case UINT32:
+        case SINT32:
             if (image_data->int_data != NULL) {
                 free_3d_int_array(image_data->int_data);
                 image_data->int_data = NULL;

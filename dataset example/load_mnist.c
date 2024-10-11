@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     printf("Loaded MNIST dataset:\n");
     printf("  Name: %s\n", dataset->name);
     printf("  Dimensions: %d x %d x %d\n", dataset->data_dimensions.height, dataset->data_dimensions.width, dataset->data_dimensions.channels);
-    printf("  Data Type: %s\n", dataset->data_type == UINT32? "UINT8" : "FLOAT32");
+    printf("  Data Type: %s\n", dataset->data_type == SINT32? "UINT8" : "FLOAT32");
     printf("  Training Set Size: %d\n", dataset->num_images);
     printf("  Test Set Size: %d\n", dataset->val_dataset->num_images);
 
