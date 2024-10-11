@@ -27,7 +27,7 @@ else ifeq ($(UNAME), Darwin)
     LDFLAGS += -L/opt/homebrew/Cellar/json-c/0.17/lib -L/opt/homebrew/Cellar/jpeg-turbo/3.0.4/lib -L/opt/homebrew/opt/libpng/lib -L/opt/homebrew/Cellar/hdf5/1.14.3_1/lib
 else
     # Windows 系统的库链接路径（根据实际需要调整）
-    LDFLAGS += -LD:\\Apps\\vcpkg\\installed\\x64-windows\\lib
+    LDFLAGS += -LD:\Apps\vcpkg\installed\x64-windows\lib
 endif
 
 # 链接库
@@ -44,7 +44,7 @@ else ifeq ($(UNAME), Darwin)
     CFLAGS += -I/usr/local/include/stb -I/opt/homebrew/Cellar/json-c/0.17/include -I/opt/homebrew/Cellar/json-c/0.17/include/json-c -I/opt/homebrew/Cellar/jpeg-turbo/3.0.4/include -I/opt/homebrew/opt/libpng/include/libpng16 -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include
 else
     # Windows 系统的头文件路径（根据实际需要调整）
-    CFLAGS += -ID:\\Apps\\vcpkg\\installed\\x64-windows\\include
+    CFLAGS += -ID:\Apps\vcpkg\installed\x64-windows\include
 endif
 
 # 设置目标文件扩展名
@@ -73,7 +73,7 @@ $(EXAMPLE_EXECUTABLE): main$(OBJ_EXT) $(OBJECTS)
 main$(OBJ_EXT): main.c $(HEADERS)
 	$(CC) $(CFLAGS) -c main.c -o main$(OBJ_EXT)
 
-%.$(OBJ_EXT): %.c $(HEADERS)
+%$(OBJ_EXT): %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
