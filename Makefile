@@ -56,15 +56,17 @@ else
     OBJ_EXT = .obj
 endif
 
+# Handle path conversion for Windows (use backslashes for file paths)
+ifeq ($(OS), Windows_NT)
+    # Convert slashes in SOURCES to backslashes for Windows compatibility
+    SOURCES := $(subst /,\\,$(SOURCES))
+endif
+
 # 排除 main.c
 SOURCES = $(filter-out main.c, $(wildcard *.c input/data.c model/model.c model/layer/layer.c model/loss/losses.c model/metric/metric.c model/optimizer/optimizer.c utils/*.c utils/compute/*.c))
 OBJECTS = $(patsubst %.c, %$(OBJ_EXT), $(SOURCES))
 HEADERS = $(wildcard *.h input/*.h model/*.h model/layer/*.h model/loss/*.h model/metric/*.h model/optimizer/*.h utils/*.h utils/compute/*.h)
 EXAMPLE_EXECUTABLE = main
-
-ifeq ($(OS), Windows_NT)
-    SOURCES := $(shell echo $(SOURCES) | sed 's/\\/\//g')
-endif
 
 all: $(EXAMPLE_EXECUTABLE)
 
