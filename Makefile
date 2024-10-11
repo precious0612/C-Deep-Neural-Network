@@ -59,7 +59,7 @@ HEADERS = $(wildcard *.h input/*.h model/*.h model/layer/*.h model/loss/*.h mode
 EXAMPLE_EXECUTABLE = main
 
 ifeq ($(OS), Windows_NT)
-    SOURCES := $(shell echo $(SOURCES) | sed 's/\\/\//g')
+    SOURCES := $(subst /,\\,$(SOURCES))
 endif
 
 all: $(EXAMPLE_EXECUTABLE)
