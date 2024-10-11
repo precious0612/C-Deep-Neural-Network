@@ -646,7 +646,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
                 }
 
                 switch (batch->data_type) {
-                    case INT32:
+                    case UINT32:
                         batched_inputs[i] = copy_3d_float_array_from_int(batch->images[i]->int_data, model->input.width, model->input.height, model->input.channels);
                         break;
                     case FLOAT32:
@@ -762,7 +762,7 @@ Accuracy evaluate_model(Model* model, Dataset* dataset) {
             }
 
             switch (batch->data_type) {
-                case INT32:
+                case UINT32:
                     output = forward_pass_for_evaluate(model, copy_3d_float_array_from_int(batch->images[i]->int_data, model->input.width, model->input.height, model->input.channels));
                     if (output == NULL) {
                         fprintf(stderr, "Error: Forward pass failed for image %d in batch %d.\n", i + 1, batch_count + 1);

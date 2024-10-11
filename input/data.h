@@ -14,7 +14,7 @@
 
 // TODO: Define the data types supported by the library
 typedef enum {
-    INT32,    // most OS int will be 32 bytes (prevent confliction with windows.h)
+    UINT32,    // most OS int will be 32 bytes (prevent confliction with windows.h)
     FLOAT32
 }DataType;
 
@@ -47,7 +47,7 @@ typedef enum {
 /// - Parameters:
 ///   - filename: Path to the image file.
 ///   - input_dimensions: A pointer to a `Dimensions` structure specifying the desired dimensions of the input data.
-///   - data_type: The type of data that the image will be converted to (e.g., `INT32` or `FLOAT32`).
+///   - data_type: The type of data that the image will be converted to (e.g., `UINT32` or `FLOAT32`).
 /// - Returns: a pointer to the `InputData` structure containing the loaded image data, or `NULL` if the image could not be loaded.
 ///
 /// - Logic for Determining Image Format:
@@ -58,7 +58,7 @@ typedef enum {
 /// - Example Usage:
 ///     ```c
 ///     Dimensions img_dims = {640, 480, 3};
-///     InputData* image_data = load_input_data_from_image("path/to/image.jpg", &img_dims, INT32);
+///     InputData* image_data = load_input_data_from_image("path/to/image.jpg", &img_dims, UINT32);
 ///     if (image_data == NULL) {
 ///         // Handle error
 ///     }
@@ -72,14 +72,14 @@ InputData* load_input_data_from_image(const char *filename, const Dimensions *in
 ///   - width: The width of the image data.
 ///   - height: The height of the image data.
 ///   - channels: The number of channels in the imge data.
-///   - data_type: The type of data stored in the image data (e.g., `INT32` or `FLOAT32`).
+///   - data_type: The type of data stored in the image data (e.g., `UINT32` or `FLOAT32`).
 ///   - fill_value: The value to initialize each pixel with.
 /// - Throws: If memory allocation for the `InputData` structure fails, an error message is printed to `stderr`, and `NULL` is returned. If memory allocation for the `int_data` or `float32_data` fails at any point, an error message is printed to `stderr`, all previously allocated memory is freed, and `NULL` is returned.
 /// - Returns: a pointer to the newly created `InputData` structure, or `NULL` if memory allocation fails.
 ///
 /// - Example Usage:
 ///     ```c
-///     InputData* image_data = create_empty_input_data(640, 480, 3, INT32, 0);
+///     InputData* image_data = create_empty_input_data(640, 480, 3, UINT32, 0);
 ///     if (image_data == NULL) {
 ///         // Handle error
 ///     }
@@ -92,7 +92,7 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
 ///   - image_data_ptr: A pointer to a pointer of the `InputData` structure containing the original image data.
 ///   - original_dimensions: The original dimensions of the image.
 ///   - new_dimensions: The new dimensions to which the image should be resized.
-///   - data_type: The type of data stored in the image data (e.g., `INT32` or `FLOAT32`).
+///   - data_type: The type of data stored in the image data (e.g., `UINT32` or `FLOAT32`).
 /// - Returns: `0` on successful resize, `-1` if the provided dimensions are invalid (non-positive values) and `-2` if memory allocation for the resized image fails.
 ///
 /// - Resizing Algorithm
@@ -104,7 +104,7 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
 ///     ```c
 ///     Dimensions orig_dims = {640, 480, 3};
 ///     Dimensions new_dims = {800, 600, 3};
-///     int result = resize_image(&image_data, orig_dims, new_dims, INT32);
+///     int result = resize_image(&image_data, orig_dims, new_dims, UINT32);
 ///     if (result != 0) {
 ///         // Handle error
 ///     }
@@ -117,7 +117,7 @@ int resize_image(InputData **image_data_ptr, const Dimensions original_dimension
 /// - Parameters:
 ///   - src: A pointer to the source `InputData` structure.
 ///   - dimensions: The dimensions of the source image.
-///   - data_type: The type of data stored in the image data (e.g., `INT32` or `FLOAT32`).
+///   - data_type: The type of data stored in the image data (e.g., `UINT32` or `FLOAT32`).
 /// - Returns: A pointer to the new `InputData` structure stored the source image data.
 ///
 /// - Example Usage:
@@ -132,7 +132,7 @@ InputData* copy_image_data(InputData* src, Dimensions dimensions, DataType data_
 /// - Parameters:
 ///   - image_data: A pointer to the `InputData` structure containing the image data to be freed.
 ///   - dimensions: The dimensions of the image, used to determine the number of rows in the data arrays.
-///   - data_type: The type of data stored in the image data (e.g., `INT32` or `FLOAT32`).
+///   - data_type: The type of data stored in the image data (e.g., `UINT32` or `FLOAT32`).
 ///
 /// - Memory Deallocation Algorithm:
 ///   - The function first checks if the `image_data` pointer is `NULL`, and if so, returns immediately.
@@ -142,9 +142,9 @@ InputData* copy_image_data(InputData* src, Dimensions dimensions, DataType data_
 ///
 /// - Example Usage:
 ///     ```c
-///     InputData* image_data = create_image_data(orig_dims, INT32);
+///     InputData* image_data = create_image_data(orig_dims, UINT32);
 ///     // ... image manipulation code ...
-///     free_image_data(image_data, orig_dims, INT32);
+///     free_image_data(image_data, orig_dims, UINT32);
 ///     ```
 ///
 void free_image_data(InputData *image_data, Dimensions dimensions, DataType data_type);
