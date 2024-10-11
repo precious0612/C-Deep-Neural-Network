@@ -77,7 +77,11 @@ main$(OBJ_EXT): main.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS) $(EXAMPLE_EXECUTABLE)
+ifeq ($(UNAME), Windows)
+	del /Q $(subst /,\,$(OBJECTS)) $(subst /,\,$(EXAMPLE_EXECUTABLE)) *.obj *.o 2>nul || exit 0
+else
+	rm -f $(OBJECTS) $(EXAMPLE_EXECUTABLE) *.obj *.o
+endif
 
 run_example: $(EXAMPLE_EXECUTABLE)
 	./$(EXAMPLE_EXECUTABLE)
