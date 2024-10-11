@@ -20,7 +20,11 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 #define STB_IMAGE__RESIZE_IMPLEMENTATION
-#include <stb_image_resize.h>
+#ifdef __unix__
+    #include <stb_image_resize.h>
+else
+    #include <stb_image_resize2.h>
+#endif
 
 // MARK: - Implementations
 
