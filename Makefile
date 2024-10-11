@@ -44,7 +44,7 @@ else ifeq ($(UNAME), Darwin)
     CFLAGS += -I/usr/local/include/stb -I/opt/homebrew/Cellar/json-c/0.17/include -I/opt/homebrew/Cellar/json-c/0.17/include/json-c -I/opt/homebrew/Cellar/jpeg-turbo/3.0.4/include -I/opt/homebrew/opt/libpng/include/libpng16 -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include
 else
     # Windows 系统的头文件路径（根据实际需要调整）
-    CFLAGS += -ID:\Apps\vcpkg\installed\x64-windows\include
+    CFLAGS += -ID:\Apps\vcpkg\installed\x64-windows\include -ID:\Apps\vcpkg\installed\x64-windows\include\openblas
 endif
 
 # 设置目标文件扩展名
