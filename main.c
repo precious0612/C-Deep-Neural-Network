@@ -75,7 +75,7 @@ int main(int argc, const char * argv[]) {
     }
 
     // Free the memory allocated for image data
-    free_image_data(image_data, new_dimensions, INT);
+    free_image_data(image_data, new_dimensions, INT32);
 
     printf("Image processing completed successfully.\n");
 
@@ -91,7 +91,7 @@ int main(int argc, const char * argv[]) {
     printf("\nLoading dataset from JSON file...\n");
     strcpy(rel_path, "dataset example/test_data_without_val/dataset.json");
     snprintf(fullpath, sizeof(fullpath), "%s/%s", PROJECT_PATH, rel_path);
-    Dataset* dataset = load_dataset_from_json(fullpath, input_dimensions, INT, 0);
+    Dataset* dataset = load_dataset_from_json(fullpath, input_dimensions, INT32, 0);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset from JSON file\n");
         return 1;

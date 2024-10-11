@@ -41,7 +41,7 @@ typedef struct Dataset{
 /// - Parameters:
 ///   - file_path: A constant character pointer to the JSON file path.
 ///   - input_dimension: The dimensions of the input data.
-///   - data_type: The type of data stored in the dataset (e.g., `INT` or `FLOAT32`).
+///   - data_type: The type of data stored in the dataset (e.g., `INT32` or `FLOAT32`).
 ///   - include_val_dataset: An integer flag indicating whether to include a validation dataset (non-zero to include).
 /// - Throws: If memory allocation fails at any point or if the JSON content cannot be parsed, appropriate error messages are printed to `stderr`, and `NULL` is returned. All previously allocated memory is freed in case of errors.
 /// - Returns: A pointer to the newly created Dataset structure, or NULL if memory allocation fails or the JSON content is invalid.
@@ -51,7 +51,7 @@ typedef struct Dataset{
 ///     Dataset* dataset = load_dataset_from_json("data/dataset.json", input_dim, FLOAT32, 1);
 ///     if (dataset == NULL) {
 ///         // Handle error
-///     } 
+///     }
 ///     ```
 ///
 Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimension, DataType data_type, int include_val_dataset);
@@ -75,7 +75,7 @@ void create_dataset_json_file(const char* folder_path, int include_val_dataset, 
 ///   - name: A constant character pointer to the name of the dataset. Can be `NULL`.
 ///   - num_images: The number of images in the dataset.
 ///   - input_dimensions: The dimensions of the input data.
-///   - data_type: The type of data stored in the dataset (e.g., `INT` or `FLOAT32`).
+///   - data_type: The type of data stored in the dataset (e.g., `INT32` or `FLOAT32`).
 /// - Throws: If memory allocation fails at any point, an error message is printed to `stderr`, all previously allocated memory is freed, and `NULL` is returned.
 /// - Returns: A pointer to the newly created `Dataset` structure, or `NULL` if memory allocation fails.
 ///
@@ -154,7 +154,7 @@ void free_dataset(Dataset* dataset);
 ///   - train_labels_path: The file path to the training labels.
 ///   - test_images_path: The file path to the test images.
 ///   - test_labels_path: The file path to the test labels.
-///   - data_type: The data type of the image data (INT or FLOAT32).
+///   - data_type: The data type of the image data (INT32 or FLOAT32).
 ///
 /// - Returns:
 ///   A pointer to the loaded `Dataset` structure if successful, or NULL if an error occurs.

@@ -56,7 +56,7 @@ InputData* load_input_data_from_image(const char* filename, const Dimensions* in
             format = PIC;
         }
     }
-    
+
     // Delegate to original load_image_data function with the determined format and provided input dimensions
     return load_image_data_with_format(filename, input_dimensions, data_type, format);
 }
@@ -89,7 +89,7 @@ static float*** loadFloatJPEG(const char* jpegFileName, int* width, int* height)
         tjDestroy(jpegDecompressor);
         return NULL;
     }
-    
+
     if (fread(jpegBuffer, 1, jpegFileSize, jpegFile) != jpegFileSize) {
         fprintf(stderr, "Error reading JPEG file\n");
         free(jpegBuffer);
@@ -109,7 +109,7 @@ static float*** loadFloatJPEG(const char* jpegFileName, int* width, int* height)
         tjDestroy(jpegDecompressor);
         return NULL;
     }
-    
+
     int pixelFormat = TJPF_RGB;
     unsigned char* rgbBuffer = (unsigned char*)malloc((*width) * (*height) * tjPixelSize[pixelFormat]);
     if (!rgbBuffer) {
@@ -130,7 +130,7 @@ static float*** loadFloatJPEG(const char* jpegFileName, int* width, int* height)
         tjDestroy(jpegDecompressor);
         return NULL;
     }
-    
+
     free(jpegBuffer);
     jpegBuffer = NULL;
     tjDestroy(jpegDecompressor);
@@ -142,7 +142,7 @@ static float*** loadFloatJPEG(const char* jpegFileName, int* width, int* height)
         rgbBuffer = NULL;
         return NULL;
     }
-    
+
     float *p = &floatArray[0][0][0];
     for (int index = 0; index < *height * *width * 3; ++index) {
         p[index] = (float)rgbBuffer[index];
@@ -180,7 +180,7 @@ static int*** loadIntJPEG(const char* jpegFileName, int* width, int* height) {
         tjDestroy(jpegDecompressor);
         return NULL;
     }
-    
+
     if (fread(jpegBuffer, 1, jpegFileSize, jpegFile) != jpegFileSize) {
         fprintf(stderr, "Error reading JPEG file\n");
         free(jpegBuffer);
@@ -200,7 +200,7 @@ static int*** loadIntJPEG(const char* jpegFileName, int* width, int* height) {
         tjDestroy(jpegDecompressor);
         return NULL;
     }
-    
+
     int pixelFormat = TJPF_RGB;
     unsigned char* rgbBuffer = (unsigned char*)malloc((*width) * (*height) * tjPixelSize[pixelFormat]);
     if (!rgbBuffer) {
@@ -221,11 +221,11 @@ static int*** loadIntJPEG(const char* jpegFileName, int* width, int* height) {
         tjDestroy(jpegDecompressor);
         return NULL;
     }
-    
+
     free(jpegBuffer);
     jpegBuffer = NULL;
     tjDestroy(jpegDecompressor);
-    
+
     int*** intArray = calloc_3d_int_array(*width, *height, 3);
     if (!intArray) {
         fprintf(stderr, "Error allocating memory for float array\n");
@@ -233,7 +233,7 @@ static int*** loadIntJPEG(const char* jpegFileName, int* width, int* height) {
         rgbBuffer = NULL;
         return NULL;
     }
-    
+
     int *p = &intArray[0][0][0];
     for (int index = 0; index < *height * *width * 3; ++index) {
         p[index] = (int)rgbBuffer[index];
@@ -323,7 +323,7 @@ static float*** loadFloatPNG(const char* pngFileName, int* width, int* height) {
         fclose(pngFile);
         return NULL;
     }
-    
+
     for (int y = 0; y < *height; ++y) {
         png_read_row(pngPtr, rowBuffer, NULL);
         for (int x = 0; x < *width; ++x) {
@@ -419,7 +419,7 @@ static int*** loadIntPNG(const char* pngFileName, int* width, int* height) {
         fclose(pngFile);
         return NULL;
     }
-    
+
     for (int y = 0; y < *height; ++y) {
         png_read_row(pngPtr, rowBuffer, NULL);
         for (int x = 0; x < *width; ++x) {
@@ -541,15 +541,15 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
         fprintf(stderr, "Error allocating memory for image data\n");
         return NULL;
     }
-    
+
     // Initialize image_data to NULL
     image_data->float32_data = NULL;
 //    image_data->int_data = NULL;
-    
+
     // Determine image dimensions
     Dimensions image_dimensions;
     image_dimensions.channels = input_dimensions->channels;
-    
+
     // Load image data based on format and data type
     int load_success = 0;
     switch (format) {
@@ -558,17 +558,17 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
             if (data_type == FLOAT32) {
                 image_data->float32_data = loadFloatJPEG(filename, &image_dimensions.width, &image_dimensions.height);
                 load_success = (image_data->float32_data != NULL);
-            }else if (data_type == INT) {
+            }else if (data_type == INT32) {
                 image_data->int_data = loadIntJPEG(filename, &image_dimensions.width, &image_dimensions.height);
                 load_success = (image_data->int_data != NULL);
             }
             break;
-            
+
         case PNG:
             if (data_type == FLOAT32) {
                 image_data->float32_data = loadFloatPNG(filename, &image_dimensions.width, &image_dimensions.height);
                 load_success = (image_data->float32_data != NULL);
-            } else if (data_type == INT) {
+            } else if (data_type == INT32) {
                 image_data->int_data = loadIntPNG(filename, &image_dimensions.width, &image_dimensions.height);
                 load_success = (image_data->int_data != NULL);
             }
@@ -583,12 +583,12 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
             if (data_type == FLOAT32) {
                 image_data->float32_data = loadFloatImage(filename, &image_dimensions.width, &image_dimensions.height, &image_dimensions.channels);
                 load_success = (image_data->float32_data != NULL);
-            } else if (data_type == INT) {
+            } else if (data_type == INT32) {
                 image_data->int_data = loadIntImage(filename, &image_dimensions.width, &image_dimensions.height, &image_dimensions.channels);
                 load_success = (image_data->int_data != NULL);
             }
             break;
-            
+
         default:
             // Handle unsupported image format
             fprintf(stderr, "Unsupported image format\n");
@@ -596,19 +596,19 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
             image_data = NULL;
             return NULL;
     }
-    
+
     if (!load_success) {
         // Handle error loading image data
         if (data_type == FLOAT32) {
             fprintf(stderr, "Error loading image data as float array\n");
-        } else if (data_type == INT) {
+        } else if (data_type == INT32) {
             fprintf(stderr, "Error loading image data as int array\n");
         }
         free(image_data);
         image_data = NULL;
         return NULL;
     }
-    
+
     // Resize the image data if needed
     if (image_dimensions.width != input_dimensions->width || image_dimensions.height != input_dimensions->height) {
         int is_error = resize_image(&image_data, image_dimensions, *input_dimensions, data_type);
@@ -624,7 +624,7 @@ InputData* load_image_data_with_format(const char* filename, const Dimensions* i
             return NULL;
         }
     }
-    
+
     return image_data;
 }
 
@@ -636,13 +636,13 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
         fprintf(stderr, "Error allocating memory for inputData structure\n");
         return NULL;
     }
-    
+
     // Initialize pointers to NULL
     image_data->float32_data = NULL;
 
     // Allocate memory for pixel values based on data type and dimensions
     switch(data_type) {
-        case INT:
+        case INT32:
             image_data->int_data = calloc_3d_int_array(width, height, channels);
             if (image_data->int_data == NULL) {
                 // Handle memory allocation error
@@ -651,7 +651,7 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
                 image_data = NULL;
                 return NULL;
             }
-            
+
             // Optionally initialize pixel values to fill_value
             int* int_p = &image_data->int_data[0][0][0];
             if (fill_value != 0) {
@@ -659,7 +659,7 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
                     int_p[index] = fill_value;
                 }
             }
-            
+
             break;
         case FLOAT32:
             image_data->float32_data = calloc_3d_float_array(width, height, channels);
@@ -670,7 +670,7 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
                 image_data = NULL;
                 return NULL;
             }
-        
+
             // Optionally initialize pixel values to fill_value
             float* float_p = &image_data->float32_data[0][0][0];
             if (fill_value != 0) {
@@ -678,7 +678,7 @@ InputData* create_empty_input_data(int width, int height, int channels, DataType
                     float_p[index] = (float)fill_value;
                 }
             }
-        
+
             break;
     }
 
@@ -727,7 +727,7 @@ int resize_image(InputData **image_data_ptr, const Dimensions original_dimension
                 float dy = source_y - y0;
 
                 // Calculate the interpolated value based on data type
-                if (data_type == INT) {
+                if (data_type == INT32) {
                     int top_left = image_data->int_data[y0][x0][c];
                     int top_right = image_data->int_data[y0][x1][c];
                     int bottom_left = image_data->int_data[y1][x0][c];
@@ -769,7 +769,7 @@ InputData* copy_image_data(InputData* src, Dimensions dimensions, DataType data_
     }
 
     switch (data_type) {
-        case INT:
+        case INT32:
             dst->int_data = copy_3d_int_array(src->int_data, dimensions.width, dimensions.height, dimensions.channels);
             if (dst->int_data == NULL) {
                 free(dst);
@@ -797,7 +797,7 @@ void free_image_data(InputData *image_data, Dimensions dimensions, DataType data
 
     // Free allocated memory for pixel values
     switch(data_type) {
-        case INT:
+        case INT32:
             if (image_data->int_data != NULL) {
                 free_3d_int_array(image_data->int_data);
                 image_data->int_data = NULL;

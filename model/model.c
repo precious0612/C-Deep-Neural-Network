@@ -45,7 +45,7 @@ static void add_layer_to_model(Model* model, Layer* layer) {
 void add_layer(Model* model, LayerType layer_type, int num_filters, int filter_size, int stride, int padding, ActivationType activation, PoolType pool_type, float dropout_rate) {
     Layer* layer;
     LayerParams params;
-    
+
     switch (layer_type) {
         case CONVOLUTIONAL:
             params.conv_params.activation  = activation;
@@ -53,47 +53,47 @@ void add_layer(Model* model, LayerType layer_type, int num_filters, int filter_s
             params.conv_params.filter_size = filter_size;
             params.conv_params.stride      = stride;
             params.conv_params.padding     = padding;
-            
+
             layer = create_layer(CONVOLUTIONAL, params);
             add_layer_to_model(model, layer);
             break;
-            
+
         case POOLING:
             params.pooling_params.pool_type = pool_type;
             params.pooling_params.pool_size = filter_size;
             params.pooling_params.stride    = stride;
-            
+
             layer = create_layer(POOLING, params);
             add_layer_to_model(model, layer);
             break;
-            
+
         case FULLY_CONNECTED:
             params.fc_params.num_neurons = num_filters;
             params.fc_params.activation  = activation;
-            
+
             layer = create_layer(FULLY_CONNECTED, params);
             add_layer_to_model(model, layer);
             break;
-            
+
         case DROPOUT:
             params.dropout_params.dropout_rate = dropout_rate;
 
             layer = create_layer(DROPOUT, params);
             add_layer_to_model(model, layer);
             break;
-            
+
         case ACTIVATION:
             params.activation_params.activation = activation;
-            
+
             layer = create_layer(ACTIVATION, params);
             add_layer_to_model(model, layer);
             break;
-            
+
         case FLATTEN:
             layer = create_layer(FLATTEN, (LayerParams){});
             add_layer_to_model(model, layer);
             break;
-            
+
         default:
             fprintf(stderr, "Error: Invalid layer type specified.\n");
             break;
@@ -181,7 +181,7 @@ void compile_model(Model* model, OptimizerType optimizer_type, LearningRate lear
             next_layer->input_shape = current_layer->output_shape;
         }
     }
-    
+
     for (int i = 0; i < num_layers; ++i) {
         Layer* current_layer = model->layers[i];
         if (current_layer == NULL) {
@@ -249,15 +249,15 @@ static void print_model_config(const Model* model) {
         case SGD:
             printf("Optimizer: SGD(Stochastic gradient descent)\n");
             break;
-        
+
         case ADAM:
             printf("Optimizer: Adam(Adaptive Moment Estimation)\n");
             break;
-            
+
         case RMSPROP:
             printf("Optimizer: RMSProp(Root Mean Square Propagation)\n");
             break;
-            
+
         default:
             printf("Optimizer: Undefined optimizer\n");
             break;
@@ -267,11 +267,11 @@ static void print_model_config(const Model* model) {
         case CrossEntropy:
             printf("Loss Function: cross-entropy loss\n");
             break;
-            
+
         case MSE:
             printf("Loss Function: MSE(mean squared error)\n");
             break;
-            
+
         default:
             printf("Loss Function: Undefined loss function\n");
             break;
@@ -280,11 +280,11 @@ static void print_model_config(const Model* model) {
         case ACCURACY:
             printf("Evaluation Metric: Accuracy\n");
             break;
-            
+
         case LOSS:
             printf("Evaluation Metric: Loss\n");
             break;
-            
+
         default:
             printf("Evaluation Metric: Undefined metric\n");
             break;
@@ -296,19 +296,19 @@ static void print_layer_activation(ActivationType activation) {
         case RELU:
             printf("  Activation Function: ReLU(rectified linear unit)\n");
             break;
-            
+
         case SIGMOID:
             printf("  Activation Function: Sigmoid\n");
             break;
-            
+
         case TANH:
             printf("  Activation Function: Tanh(Hyperbolic tangent)\n");
             break;
-            
+
         case SOFTMAX:
             printf("  Activation Function: Softmax\n");
             break;
-            
+
         default:
             printf("  Activation Function: Undefined activation function\n");
             break;
@@ -343,11 +343,11 @@ static void print_layer_info(const Layer* layer, int layer_num) {
                 case MAX:
                     printf("  Pool Type: max\n");
                     break;
-                    
+
                 case AVARAGE:
                     printf("  Pool Type: avarage\n");
                     break;
-                    
+
                 default:
                     printf("  Pool Type: Undefined pool type\n");
                     break;
@@ -412,37 +412,37 @@ void print_model_info(const Model* model) {
 }
 
 Output forward_pass(Model* model, Input input) {
-    
+
     Input temp_input = copy_3d_float_array(input, model->input.width, model->input.height, model->input.channels);
     Output output    = NULL;
-    
+
     for (int i = 0; i < model->num_layers; ++i) {
         output = layer_forward_pass(model->layers[i], temp_input, 1);
         free_3d_float_array(temp_input);
         temp_input = output;
     }
-    
+
     return output;
 }
 
 static Output forward_pass_for_evaluate(Model* model, Input input) {
-    
+
     Input temp_input = copy_3d_float_array(input, model->input.width, model->input.height, model->input.channels);
     Output output    = NULL;
-    
+
     for (int i = 0; i < model->num_layers; ++i) {
         output = layer_forward_pass(model->layers[i], temp_input, 0);
         free_3d_float_array(temp_input);
         temp_input = output;
     }
-    
+
     return output;
 }
 
 static void backward_pass(Model* model, OutputGrad output_grad) {
-    
+
     OutputGrad temp_output_grad = copy_3d_float_array(output_grad, model->output.width, model->output.height, model->output.channels);
-    
+
     for (int i = model->num_layers - 1; i >= 0; --i) {
         InputGrad input_grad = calloc_3d_float_array(model->layers[i]->input_shape.width, model->layers[i]->input_shape.height, model->layers[i]->input_shape.channels);
         layer_backward_pass(model->layers[i], temp_output_grad, input_grad);
@@ -450,12 +450,12 @@ static void backward_pass(Model* model, OutputGrad output_grad) {
         temp_output_grad = input_grad;
         input_grad = NULL;
     }
-    
+
     free_3d_float_array(temp_output_grad);
 }
 
 static BatchedOutputs forward_pass_by_batches(Model* model, BatchedInputs batched_inputs, BatchSize batch_size) {
-    
+
     BatchedOutputs batched_outputs = (float****)malloc(sizeof(float***) * batch_size);
     for (int i = 0; i < batch_size; ++i) {
         batched_outputs[i] = forward_pass(model, batched_inputs[i]);
@@ -464,14 +464,14 @@ static BatchedOutputs forward_pass_by_batches(Model* model, BatchedInputs batche
 }
 
 static void backward_pass_by_batches(Model* model, BatchedOutputGrads batched_output_grads, BatchSize batch_size) {
-    
+
     for (int i = 0; i < batch_size; ++i) {
         backward_pass(model, batched_output_grads[i]);
     }
 }
 
 static void update_model_weights(Model* model) {
-    
+
     for (int i = 0; i < model->num_layers; ++i) {
         update_layer_weights(model->layers[i], model->optimizer, i);
     }
@@ -486,7 +486,7 @@ void reset_model_grads(Model* model) {
 }
 
 static void free_batch_resources(Model* model, BatchedOutputs batched_outputs, BatchedOutputGrads batched_output_grads, BatchSize batch_size) {
-    
+
     if (batched_outputs != NULL) {
         for (int i = 0; i < batch_size; i++) {
             free_3d_float_array(batched_outputs[i]);
@@ -505,14 +505,14 @@ static void free_batch_resources(Model* model, BatchedOutputs batched_outputs, B
 }
 
 static LossValue compute_loss(Output output, Label label, int num_classes, LossType type) {
-    
+
     switch (type) {
         case CrossEntropy:
             return categorical_crossentropy_loss(&output[0][0][0], label, num_classes);
-            
+
         case MSE:
             return mean_squared_error_loss(&output[0][0][0], label, num_classes);
-            
+
         default:
             fprintf(stderr, "Error: Undefined Loss Type");
             return 0.0f;
@@ -520,20 +520,20 @@ static LossValue compute_loss(Output output, Label label, int num_classes, LossT
 }
 
 static LossValue compute_loss_by_batches(BatchedOutputs batched_outputs, Label* batched_labels, LossType type, BatchSize batch_size, int num_classes) {
-    
+
     LossValue total_loss = 0.0f;
     for (int i = 0; i < batch_size; ++i) {
         compute_loss(batched_outputs[i], batched_labels[i], num_classes, type);
     }
-    
+
     return total_loss / batch_size;
 }
 
 static void compute_output_grad(OutputGrad output_grad, Output output, Label label, int num_classes, Dimensions output_shape) {
-    
+
     float* output_p        = &output[0][0][0];
     float* output_grad_p   = &output_grad[0][0][0];
-    
+
     for (int i = 0; i < num_classes; ++i) {
         if (i == label) {
             output_grad_p[i] = output_p[i] - 1.0f;
@@ -544,48 +544,48 @@ static void compute_output_grad(OutputGrad output_grad, Output output, Label lab
 }
 
 static void compute_output_grad_by_batches(BatchedOutputGrads batched_output_grads, BatchedOutputs batched_outputs, Label* batched_labels, int num_classes, BatchSize batch_size, Dimensions output_shape) {
-    
+
     for (int i = 0; i < batch_size; ++i) {
         compute_output_grad(batched_output_grads[i], batched_outputs[i], batched_labels[i], num_classes, output_shape);
     }
 }
 
 static Label get_prediction_as_metric(Output output, const Metric metric, int num_classes) {
-    
+
     float* output_p = &output[0][0][0];
-    
+
     switch (metric) {
         case ACCURACY:
             return get_prediction(output_p, num_classes);
-            
+
         case LOSS:
             return get_prediction(output_p, num_classes);
-            
+
         default:
             return -1;
     }
 }
 
 static float compute_accuracy_by_batches(BatchedOutputs batched_outputs, Label* batched_labels, BatchSize batch_size, int num_classes) {
-    
+
     int correct_predictions = 0;
-    
+
     for (int i = 0; i < batch_size; ++i) {
         if (get_prediction_as_metric(batched_outputs[i], ACCURACY, num_classes) == batched_labels[i]) {
             correct_predictions++;
         }
     }
-    
+
     return ((float)correct_predictions) / ((float)batch_size);
 }
 
 void train_model(Model* model, Dataset* dataset, int num_epochs) {
-    
+
     if (model == NULL || dataset == NULL) {
         fprintf(stderr, "Error: Model or dataset pointer is NULL.\n");
         return;
     }
-    
+
     if (model->input.width != dataset->data_dimensions.width || model->input.height != dataset->data_dimensions.height || model->input.channels != dataset->data_dimensions.channels) {
         fprintf(stderr, "Error: Model and dataset dimensions are not matched!\n");
         return;
@@ -599,7 +599,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
         fprintf(stderr, "Error: Failed to allocate memory for batch grads.\n");
         return;
     }
-    
+
     for (int i = 0; i < dataset->batch_size; ++i) {
         batched_output_grads[i] = calloc_3d_float_array(model->output.width, model->output.height, model->output.channels);
         if (batched_output_grads[i] == NULL) {
@@ -609,7 +609,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
             return;
         }
     }
-    
+
     int total_batches = 0;
     Dataset* temp_dataset = dataset;
 
@@ -618,7 +618,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
         total_batches++;
         temp_dataset = temp_dataset->next_batch;
     }
-    
+
     temp_dataset = NULL;
 
     for (int epoch = 0; epoch < num_epochs; ++epoch) {
@@ -626,7 +626,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
         int batch_count   = 0;
 
         int print_interval = PRINT_INTERVAL(total_batches);
-        
+
         while (batch != NULL) {
             int batch_num = batch_count++;
             batched_inputs = (float****)malloc(sizeof(float***) * batch->batch_size);
@@ -646,7 +646,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
                 }
 
                 switch (batch->data_type) {
-                    case INT:
+                    case INT32:
                         batched_inputs[i] = copy_3d_float_array_from_int(batch->images[i]->int_data, model->input.width, model->input.height, model->input.channels);
                         break;
                     case FLOAT32:
@@ -709,7 +709,7 @@ void train_model(Model* model, Dataset* dataset, int num_epochs) {
             printf("\nValidation Accuracy: %.2f%%\n", val_accuracy * 100.0f);
         }
     }
-    
+
     if (batched_output_grads != NULL) {
         for (int i = 0; i < dataset->batch_size; ++i) {
             free_3d_float_array(batched_output_grads[i]);
@@ -730,7 +730,7 @@ Accuracy evaluate_model(Model* model, Dataset* dataset) {
     int batch_count         = 0;
     int total_batches       = 0;
     int num_classes         = model->output.width * model->output.height * model->output.channels;
-    
+
     Dataset* temp_dataset = dataset;
 
     // Calculate the total number of batches
@@ -738,9 +738,9 @@ Accuracy evaluate_model(Model* model, Dataset* dataset) {
         total_batches++;
         temp_dataset = temp_dataset->next_batch;
     }
-    
+
     temp_dataset = NULL;
-    
+
     Dataset* batch = dataset;
 
     Output output = NULL;
@@ -762,7 +762,7 @@ Accuracy evaluate_model(Model* model, Dataset* dataset) {
             }
 
             switch (batch->data_type) {
-                case INT:
+                case INT32:
                     output = forward_pass_for_evaluate(model, copy_3d_float_array_from_int(batch->images[i]->int_data, model->input.width, model->input.height, model->input.channels));
                     if (output == NULL) {
                         fprintf(stderr, "Error: Forward pass failed for image %d in batch %d.\n", i + 1, batch_count + 1);
@@ -786,7 +786,7 @@ Accuracy evaluate_model(Model* model, Dataset* dataset) {
                 correct_predictions++;
             }
             total_samples++;
-            
+
             free_3d_float_array(output);
         }
 
@@ -818,7 +818,7 @@ void delete_model(Model* model) {
             }
             delete_layer(model->layers[i]);
         }
-        
+
         // Free the memory allocated for the layers array
         free(model->layers);
         model->layers = NULL;
@@ -828,7 +828,7 @@ void delete_model(Model* model) {
     if (model->optimizer != NULL) {
         delete_optimizer(model->optimizer, model->num_layers);
     }
-    
+
     if (model->loss != NULL) {
         delete_loss_function(model->loss);
     }
@@ -881,7 +881,7 @@ static herr_t save_conv_weights(hid_t group_id, float ****weights, int num_filte
         H5Sclose(dataspace_id);
         return -1;
     }
-    
+
     float* weights_p = &weights[0][0][0][0];
 
     herr_t status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, weights_p);
@@ -920,7 +920,7 @@ static herr_t save_fc_weights(hid_t group_id, float **weights, int num_neurons, 
         H5Sclose(dataspace_id);
         return -1;
     }
-    
+
     float* weights_p = &weights[0][0];
 
     herr_t status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, weights_p);

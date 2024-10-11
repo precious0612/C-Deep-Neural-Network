@@ -18,7 +18,7 @@ int main() {
 
     // Load dataset from JSON file
     printf("Loading dataset from JSON file...\n");
-    Dataset* dataset = load_dataset_from_json("dataset example/test_data_without_val/dataset.json", input_dimensions, INT, 0);
+    Dataset* dataset = load_dataset_from_json("dataset example/test_data_without_val/dataset.json", input_dimensions, INT32, 0);
     if (dataset == NULL) {
         fprintf(stderr, "Error: Failed to load dataset from JSON file\n");
         return 1;
@@ -29,14 +29,14 @@ int main() {
     printf("Dataset Name: %s\n", dataset->name);
     printf("Number of Images: %d\n", dataset->num_images);
     printf("Input Dimensions: %dx%d, Channels: %d\n", dataset->data_dimensions.width, dataset->data_dimensions.height, dataset->data_dimensions.channels);
-    printf("Data Type: %s\n", dataset->data_type == INT ? "INT" : "FLOAT32");
+    printf("Data Type: %s\n", dataset->data_type == INT32 ? "INT32" : "FLOAT32");
 
     // Display some information about validation dataset
     if (dataset->val_dataset != NULL) {
         printf("Validation Dataset Name: %s\n", dataset->val_dataset->name);
         printf("Number of Images: %d\n", dataset->val_dataset->num_images);
         printf("Input Dimensions: %dx%d, Channels: %d\n", dataset->val_dataset->data_dimensions.width, dataset->val_dataset->data_dimensions.height, dataset->val_dataset->data_dimensions.channels);
-        printf("Data Type: %s\n", dataset->val_dataset->data_type == INT ? "INT" : "FLOAT32");
+        printf("Data Type: %s\n", dataset->val_dataset->data_type == INT32 ? "INT32" : "FLOAT32");
     }
 
     // Create a new JSON file from dataset
