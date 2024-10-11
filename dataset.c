@@ -17,7 +17,7 @@
 #include <json-c/json.h>
 #ifdef __unix__
     #include <libgen.h>  // Unix-based systems (Linux, macOS)
-else
+#elif defined(_WIN32)
     // Implementation of basename for Windows
     char *basename(char *path) {
         char *base = strrchr(path, '\\');  // Find the last backslash
