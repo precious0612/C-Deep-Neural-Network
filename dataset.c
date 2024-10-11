@@ -15,7 +15,18 @@
 #include <stdint.h>
 #include <zlib.h>
 #include <json-c/json.h>
-#include <libgen.h>
+#ifdef __unix__
+    #include <libgen.h>  // Unix-based systems (Linux, macOS)
+else
+    // Implementation of basename for Windows
+    char *basename(char *path) {
+        char *base = strrchr(path, '\\');  // Find the last backslash
+        if (base) {
+            return base + 1;  // Return the part after the last backslash
+        }
+        return path;  // If no backslash is found, the entire path is the basename
+    }
+#endif
 
 static int load_images_from_json_array(Dataset* dataset, json_object* images_array, Dimensions input_dimension, DataType data_type) {
 

@@ -12,6 +12,10 @@
 
 #include <stdint.h>
 
+#ifndef __unix__
+    char *basename(char *path);
+#endif
+
 // TODO: Define the maximum number of images per batch
 #define MAX_IMAGES_PER_BATCH 1000
 #define MNIST_IMAGE_SIZE     28 * 28
