@@ -15,7 +15,7 @@ How to run the test example? (After cloning the project...)
 ```shell
 make clean && make && make run_example
 ```
-**(Notice: You need to install `libpng`, `jpeg-turbo`, `stb_image`, `openblas`, `hdf5`, `json-c`)**
+**(Notice: You need to install `libpng`, `libjpeg-turbo`, `stb_image`, `openblas`, `hdf5`, `json-c`)**
 
 ## Project Introduction
 
@@ -170,7 +170,7 @@ int main() {
 - [libpng](https://github.com/glennrp/libpng): Library for reading and writing PNG image files.
   License: [PNG Reference Library License](http://www.libpng.org/pub/png/src/libpng-LICENSE.txt)
 
-- [jpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo): Library for reading and writing JPEG image files. 
+- [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo): Library for reading and writing JPEG image files. 
   License: [IJG License](https://www.ijg.org/files/README)
 
 - [json-c](https://github.com/json-c/json-c): Library for parsing JSON data. 
@@ -178,3 +178,5 @@ int main() {
 
 - [hdf5](https://www.hdfgroup.org/solutions/hdf5/): Library for reading and writing HDF5 files.
   License: [HDF5 License](https://github.com/HDFGroup/hdf5?tab=License-1-ov-file#)
+
+- You could use `vcpkg` to install them on Windows

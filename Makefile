@@ -31,7 +31,11 @@ else
 endif
 
 # 链接库
-LDLIBS = -ljson-c -lturbojpeg -lpng16 -lz -lhdf5 -lopenblas
+ifeq ($(UNAME), Windows)
+    LDLIBS = -ljson-c -lturbojpeg -llibpng16 -lzlib -lhdf5 -lopenblas
+else
+    LDLIBS = -ljson-c -lturbojpeg -lpng16 -lz -lhdf5 -lopenblas
+endif
 
 # 设置头文件路径
 ifeq ($(UNAME), Linux)
