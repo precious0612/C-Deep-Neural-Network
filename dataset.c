@@ -93,14 +93,6 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
     long file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    #ifdef _WIN32
-        // Count the number of newline characters
-        long newline_count = count_newlines(file);
-
-        // Adjust file_size for Windows newline characters
-        file_size -= newline_count;
-    #endif
-
     char* json_buffer = (char*)malloc(file_size + 1);
     if (json_buffer == NULL) {
         fprintf(stderr, "Error: Memory allocation failed\n");
@@ -108,6 +100,13 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
         return NULL;
     }
     size_t bytes_read = fread(json_buffer, 1, file_size, file);
+    #ifdef _WIN32
+        // Count the number of newline characters
+        long newline_count = count_newlines(file);
+
+        // Adjust file_size for Windows newline characters
+        bytes_read += newline_count;
+    #endif
     if (bytes_read != file_size) {
         fprintf(stderr, "Error: Failed to read file content\n");
         free(json_buffer);
