@@ -26,20 +26,6 @@
         }
         return path;  // If no backslash is found, the entire path is the basename
     }
-    // Function to count the number of newline characters in the file
-    size_t count_newlines(FILE *file) {
-        size_t newline_count = 0;
-        int ch;
-
-        while ((ch = fgetc(file)) != EOF) {
-            if (ch == '\n') {
-                newline_count++;
-            }
-        }
-
-        fseek(file, 0, SEEK_SET);  // Reset file pointer to the beginning
-        return newline_count;
-    }
 #endif
 
 static int load_images_from_json_array(Dataset* dataset, json_object* images_array, Dimensions input_dimension, DataType data_type) {
@@ -84,7 +70,7 @@ static int load_images_from_json_array(Dataset* dataset, json_object* images_arr
 
 Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimension, DataType data_type, int include_val_dataset) {
     // Open the JSON file for reading
-    FILE* file = fopen(file_path, "rt");
+    FILE* file = fopen(file_path, "rb");
     if (file == NULL) {
         fprintf(stderr, "Error: Unable to open file %s\n", file_path);
         return NULL;
