@@ -27,15 +27,17 @@
         return path;  // If no backslash is found, the entire path is the basename
     }
     // Function to count the number of newline characters in the file
-    long count_newlines(FILE *file) {
-        long newline_count = 0;
+    size_t count_newlines(FILE *file) {
+        size_t newline_count = 0;
         int ch;
+
         while ((ch = fgetc(file)) != EOF) {
             if (ch == '\n') {
                 newline_count++;
             }
         }
-        fseek(file, 0, SEEK_SET); // Reset file pointer to the beginning
+
+        fseek(file, 0, SEEK_SET);  // Reset file pointer to the beginning
         return newline_count;
     }
 #endif
@@ -102,7 +104,7 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
     size_t bytes_read = fread(json_buffer, 1, file_size, file);
     #ifdef _WIN32
         // Count the number of newline characters
-        long newline_count = count_newlines(file);
+        size_t newline_count = count_newlines(file);
 
         // Adjust file_size for Windows newline characters
         bytes_read += newline_count;
