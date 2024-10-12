@@ -11,6 +11,14 @@
 #ifdef _WIN32
 #include <direct.h> // Windows 下使用
 #define get_current_dir _getcwd
+void replace_backslashes(char *str) {
+        while (*str) {
+            if (*str == '\\') {
+                *str = '/';
+            }
+            str++;
+        }
+    }
 #else
 #include <unistd.h> // Unix/Linux 下使用
 #define get_current_dir getcwd
@@ -59,6 +67,13 @@ int main(int argc, const char * argv[]) {
     } else {
         perror("Error getting current directory");
     }
+
+    #ifdef _WIN32
+
+        replace_backslashes(work_folder);
+
+    #endif
+
     char fullpath[2048];
 
     // TODO: - Test `data.h`

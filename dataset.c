@@ -26,6 +26,18 @@
         }
         return path;  // If no backslash is found, the entire path is the basename
     }
+    // Function to count the number of newline characters in the file
+    long count_newlines(FILE *file) {
+        long newline_count = 0;
+        int ch;
+        while ((ch = fgetc(file)) != EOF) {
+            if (ch == '\n') {
+                newline_count++;
+            }
+        }
+        fseek(file, 0, SEEK_SET); // Reset file pointer to the beginning
+        return newline_count;
+    }
 #endif
 
 static int load_images_from_json_array(Dataset* dataset, json_object* images_array, Dimensions input_dimension, DataType data_type) {
@@ -80,6 +92,15 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
+
+    #ifdef _WIN32
+        // Count the number of newline characters
+        long newline_count = count_newlines(file);
+
+        // Adjust file_size for Windows newline characters
+        file_size -= newline_count;
+    #endif
+
     char* json_buffer = (char*)malloc(file_size + 1);
     if (json_buffer == NULL) {
         fprintf(stderr, "Error: Memory allocation failed\n");
