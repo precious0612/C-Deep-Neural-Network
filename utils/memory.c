@@ -343,7 +343,7 @@ int**** calloc_4d_int_array(int dim1, int dim2, int dim3, int dim4) {
             for (k = 0; k < dim3; ++k) {
                 if (i == 0 && j == 0 && k > 0) {
                     intArray[0][0][k] = intArray[0][0][0] + k * dim4;
-                } else if ((i > 0 || j > 0) && k > 0) {
+                } else if (i > 0 || j > 0) {
                     intArray[i][j][k] = intArray[0][0][0] + ((i * dim2 + j) * dim3 + k) * dim4;
                 }
             }
