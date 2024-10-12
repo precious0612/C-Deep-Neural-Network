@@ -64,13 +64,13 @@ void initialize_layer(Layer* layer) {
                 fprintf(stderr, "Error: Invalid convolutional layer parameters\n");
                 return;
             }
-            
+
             layer->num_params = num_filters * input_channels * filter_size * filter_size + num_filters;
 
             layer->input = NULL;
             layer->input_before_activation = NULL;
 
-            layer->weights.conv_weights = calloc_4d_float_array(num_filters, input_channels, filter_size, filter_size);
+            layer->weights.conv_weights = calloc_4d_float_array(num_filters, filter_size, filter_size, input_channels);
             if (layer->weights.conv_weights == NULL) {
                 fprintf(stderr, "Error: Failed to allocate memory for convolutional weights\n");
                 return;
@@ -120,7 +120,7 @@ void initialize_layer(Layer* layer) {
                 fprintf(stderr, "Error: Invalid fully-connected layer parameters\n");
                 return;
             }
-            
+
             layer->num_params = num_neurons * input_size + num_neurons;
 
             layer->input = NULL;
@@ -184,7 +184,7 @@ void initialize_layer(Layer* layer) {
 }
 
 LayerOutput layer_forward_pass(Layer* layer, LayerInput input, int is_training) {
-    
+
     if (layer == NULL) {
         fprintf(stderr, "Error: Invalid layer pointer\n");
         return NULL;
@@ -194,7 +194,7 @@ LayerOutput layer_forward_pass(Layer* layer, LayerInput input, int is_training) 
         fprintf(stderr, "Error: Invalid input shape for layer\n");
         return NULL;
     }
-    
+
     LayerOutput temp_output = NULL;
     LayerOutput output = NULL;
     switch (layer->type) {
@@ -223,7 +223,7 @@ LayerOutput layer_forward_pass(Layer* layer, LayerInput input, int is_training) 
             free_3d_float_array(temp_output);
             temp_output = NULL;
             break;
-            
+
         case POOLING:
             if (is_training) {
                 if (layer->input != NULL) {
@@ -233,7 +233,7 @@ LayerOutput layer_forward_pass(Layer* layer, LayerInput input, int is_training) 
             }
             output = pool_forward(input, layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels, layer->params.pooling_params.pool_size, layer->params.pooling_params.stride, layer->params.pooling_params.pool_type);
             break;
-            
+
         case FULLY_CONNECTED:
             if (layer->input_shape.width > 1 || layer->input_shape.height > 1) {
                 temp_output  = flatten(input, layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels);
@@ -255,7 +255,7 @@ LayerOutput layer_forward_pass(Layer* layer, LayerInput input, int is_training) 
                 }
                 temp_output = fc_forward(input, layer->input_shape.channels, layer->params.fc_params.num_neurons, layer->weights.fc_weights, layer->biases);
             }
-            
+
             if (layer->params.fc_params.activation >= NONE) {
                 output = temp_output;
                 temp_output = NULL;
@@ -271,7 +271,7 @@ LayerOutput layer_forward_pass(Layer* layer, LayerInput input, int is_training) 
             free_3d_float_array(temp_output);
             temp_output = NULL;
             break;
-            
+
         case DROPOUT:
             if (is_training) {
                 if (layer->input != NULL) {
@@ -281,7 +281,7 @@ LayerOutput layer_forward_pass(Layer* layer, LayerInput input, int is_training) 
             }
             output = dropout_forward(input, layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels, layer->params.dropout_params.dropout_rate);
             break;
-            
+
         case ACTIVATION:
             if (is_training) {
                 if (layer->input != NULL) {
@@ -291,32 +291,32 @@ LayerOutput layer_forward_pass(Layer* layer, LayerInput input, int is_training) 
             }
             output = forward_activation(layer->params.activation_params.activation, input, layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels);
             break;
-            
+
         case FLATTEN:
             output = flatten(input, layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels);
             break;
-            
+
         default:
             fprintf(stderr, "Error: Unknown layer type.\n");
             output = copy_3d_float_array(input, layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels);
             break;
     }
-    
+
     return output;
 }
 
 void layer_backward_pass(Layer* layer, LayerOutputGrad output_grad, LayerInputGrad input_grad) {
-    
+
     if (layer == NULL) {
         fprintf(stderr, "Error: Invalid layer pointer\n");
         return;
     }
-    
+
     if (output_grad == NULL || input_grad == NULL) {
         fprintf(stderr, "Error: Invalid input during layer backward\n");
         return;
     }
-    
+
     switch (layer->type) {
         case CONVOLUTIONAL:
             if (layer->params.conv_params.activation <= NONE) {
@@ -326,34 +326,34 @@ void layer_backward_pass(Layer* layer, LayerOutputGrad output_grad, LayerInputGr
                           layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels,
                           layer->params.conv_params.num_filters, layer->params.conv_params.filter_size, layer->params.conv_params.stride, layer->params.conv_params.padding);
             break;
-            
+
         case POOLING:
             pool_backward(layer->input, output_grad, input_grad,
                           layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels,
                           layer->params.pooling_params.pool_size, layer->params.pooling_params.stride, layer->params.pooling_params.pool_type);
             break;
-            
+
         case FULLY_CONNECTED:
             if (layer->params.conv_params.activation <= NONE) {
                 backward_activation(layer->params.fc_params.activation, layer->input_before_activation, output_grad, output_grad, layer->params.fc_params.num_neurons);
             }
-            fc_backward(layer->input, output_grad, input_grad, layer->weights.fc_weights, layer->grads.fc_grads, layer->biases, layer->bias_grads, 
+            fc_backward(layer->input, output_grad, input_grad, layer->weights.fc_weights, layer->grads.fc_grads, layer->biases, layer->bias_grads,
                         layer->input_shape.width * layer->input_shape.height * layer->input_shape.channels, layer->params.fc_params.num_neurons);
             break;
-            
+
         case DROPOUT:
             dropout_backward(layer->input, output_grad, input_grad, layer->input_shape.width * layer->input_shape.height * layer->input_shape.channels);
             break;
-            
+
         case ACTIVATION:
             backward_activation(layer->params.activation_params.activation, layer->input, output_grad, input_grad, layer->input_shape.width * layer->input_shape.height * layer->input_shape.channels);
             break;
-            
+
         case FLATTEN:
             free_3d_float_array(input_grad);
             input_grad = unflatten(output_grad, layer->input_shape.width, layer->input_shape.height, layer->input_shape.channels);
             break;
-            
+
         default:
             fprintf(stderr, "Error: Unknown layer type.\n");
             break;
@@ -361,28 +361,28 @@ void layer_backward_pass(Layer* layer, LayerOutputGrad output_grad, LayerInputGr
 }
 
 void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
-    
+
     if (layer == NULL || optimizer == NULL) {
         fprintf(stderr, "Error: Invalid layer pointer\n");
         return;
     }
-    
+
     float*  weights_p;
     float*  weight_grads_p;
-    
+
     int num_weights = 0;
-    
+
     // MARK: SGD Pramas
     float* momentum_buffer_p;
-    
-    
+
+
     // MARK: Adam Params
     float* m_p;
     float* v_p;
-    
+
     // MARK: RMSPROP
     float* square_avg_grad_p;
-    
+
     switch (layer->type) {
         case CONVOLUTIONAL:
             switch (optimizer->type) {
@@ -394,7 +394,7 @@ void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
                     sgd(weights_p, weight_grads_p, optimizer->optimizer.sgd->momentum, momentum_buffer_p, optimizer->optimizer.sgd->learning_rate, num_weights);
                     sgd(layer->biases, layer->bias_grads, optimizer->optimizer.sgd->momentum, &momentum_buffer_p[num_weights], optimizer->optimizer.sgd->learning_rate, layer->params.conv_params.num_filters);
                     break;
-                    
+
                 case ADAM:
                     num_weights    = layer->params.conv_params.num_filters * layer->params.conv_params.filter_size * layer->params.conv_params.filter_size * layer->input_shape.channels;
                     weights_p      = &layer->weights.conv_weights[0][0][0][0];
@@ -406,7 +406,7 @@ void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
                     adam(layer->biases, layer->bias_grads, &m_p[num_weights], &v_p[num_weights],
                          optimizer->optimizer.adam->beta1, optimizer->optimizer.adam->beta2, optimizer->optimizer.adam->epsilon, optimizer->optimizer.adam->t, optimizer->optimizer.adam->learning_rate, layer->params.conv_params.num_filters);
                     break;
-                    
+
                 case RMSPROP:
                     num_weights       = layer->params.conv_params.num_filters * layer->params.conv_params.filter_size * layer->params.conv_params.filter_size * layer->input_shape.channels;
                     weights_p         = &layer->weights.conv_weights[0][0][0][0];
@@ -417,7 +417,7 @@ void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
                     rmsprop(layer->biases, layer->bias_grads, &square_avg_grad_p[num_weights],
                             optimizer->optimizer.rmsprop->rho, optimizer->optimizer.rmsprop->epsilon, optimizer->optimizer.rmsprop->learning_rate, layer->params.conv_params.num_filters);
                     break;
-                    
+
                 default:
                     fprintf(stderr, "Undefined optimizer\n");
                     break;
@@ -433,7 +433,7 @@ void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
                     sgd(weights_p, weight_grads_p, optimizer->optimizer.sgd->momentum, momentum_buffer_p, optimizer->optimizer.sgd->learning_rate, num_weights);
                     sgd(layer->biases, layer->bias_grads, optimizer->optimizer.sgd->momentum, &momentum_buffer_p[num_weights], optimizer->optimizer.sgd->learning_rate, layer->params.fc_params.num_neurons);
                     break;
-                    
+
                 case ADAM:
                     num_weights    = layer->params.fc_params.num_neurons * layer->input_shape.height * layer->input_shape.width * layer->input_shape.channels;
                     weights_p      = &layer->weights.fc_weights[0][0];
@@ -445,7 +445,7 @@ void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
                     adam(layer->biases, layer->bias_grads, &m_p[num_weights], &v_p[num_weights],
                          optimizer->optimizer.adam->beta1, optimizer->optimizer.adam->beta2, optimizer->optimizer.adam->epsilon, optimizer->optimizer.adam->t, optimizer->optimizer.adam->learning_rate, layer->params.fc_params.num_neurons);
                     break;
-                    
+
                 case RMSPROP:
                     num_weights       = layer->params.fc_params.num_neurons * layer->input_shape.height * layer->input_shape.width * layer->input_shape.channels;
                     weights_p         = &layer->weights.fc_weights[0][0];
@@ -456,7 +456,7 @@ void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
                     rmsprop(layer->biases, layer->bias_grads, &square_avg_grad_p[num_weights],
                             optimizer->optimizer.rmsprop->rho, optimizer->optimizer.rmsprop->epsilon, optimizer->optimizer.rmsprop->learning_rate, layer->params.fc_params.num_neurons);
                     break;
-                    
+
                 default:
                     fprintf(stderr, "Undefined optimizer\n");
                     break;
@@ -469,9 +469,9 @@ void update_layer_weights(Layer* layer, Optimizer* optimizer, int layer_index) {
 }
 
 void reset_layer_grads(Layer* layer) {
-    
+
     float* grads_p;
-    
+
     switch (layer->type) {
         case CONVOLUTIONAL:
             grads_p = &layer->grads.conv_grads[0][0][0][0];
