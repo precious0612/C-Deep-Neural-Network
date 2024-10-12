@@ -84,7 +84,7 @@ static int load_images_from_json_array(Dataset* dataset, json_object* images_arr
 
 Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimension, DataType data_type, int include_val_dataset) {
     // Open the JSON file for reading
-    FILE* file = fopen(file_path, "r");
+    FILE* file = fopen(file_path, "rt");
     if (file == NULL) {
         fprintf(stderr, "Error: Unable to open file %s\n", file_path);
         return NULL;
@@ -102,13 +102,6 @@ Dataset* load_dataset_from_json(const char* file_path, Dimensions input_dimensio
         return NULL;
     }
     size_t bytes_read = fread(json_buffer, 1, file_size, file);
-    #ifdef _WIN32
-        // Count the number of newline characters
-        size_t newline_count = count_newlines(file);
-
-        // Adjust file_size for Windows newline characters
-        bytes_read += newline_count;
-    #endif
     if (bytes_read != file_size) {
         fprintf(stderr, "Error: Failed to read file content\n");
         free(json_buffer);
