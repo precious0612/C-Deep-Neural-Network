@@ -75,7 +75,7 @@ int** copy_2d_int_array(int** src, int dim1, int dim2) {
     if (dst == NULL) {
         return NULL;
     }
-    
+
     memcpy(src[0], dst[0], dim1 * dim2 * sizeof(int));
 
     return dst;
@@ -90,7 +90,7 @@ float** copy_2d_float_array(float** src, int dim1, int dim2) {
     if (dst == NULL) {
         return NULL;
     }
-    
+
     memcpy(dst[0], src[0], dim1 * dim2 * sizeof(float));
 
     return dst;
@@ -224,7 +224,7 @@ int*** copy_3d_int_array(int*** src, int dim1, int dim2, int dim3) {
 
     int* src_p = &src[0][0][0];
     int* dst_p = &dst[0][0][0];
-    
+
     memcpy(dst_p, src_p, dim1 * dim2 * dim3 * sizeof(int));
 
     return dst;
@@ -242,7 +242,7 @@ float*** copy_3d_float_array(float*** src, int dim1, int dim2, int dim3) {
 
     float* src_p = &src[0][0][0];
     float* dst_p = &dst[0][0][0];
-    
+
     memcpy(dst_p, src_p, dim1 * dim2 * dim3 * sizeof(float));
 
     return dst;
@@ -260,7 +260,7 @@ float*** copy_3d_float_array_from_int(int*** src, int dim1, int dim2, int dim3) 
 
     int*   src_p = &src[0][0][0];
     float* dst_p = &dst[0][0][0];
-    
+
     for (int index = 0; index < dim1 * dim2 * dim3; ++index) {
         dst_p[index] = (float)src_p[index];
     }
@@ -398,7 +398,7 @@ float**** calloc_4d_float_array(int dim1, int dim2, int dim3, int dim4) {
             for (k = 0; k < dim3; ++k) {
                 if (i == 0 && j == 0 && k > 0) {
                     floatArray[0][0][k] = floatArray[0][0][0] + k * dim4;
-                } else if ((i > 0 || j > 0) && k > 0) {
+                } else if (i > 0 || j > 0) {
                     floatArray[i][j][k] = floatArray[0][0][0] + ((i * dim2 + j) * dim3 + k) * dim4;
                 }
             }
