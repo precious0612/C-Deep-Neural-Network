@@ -89,7 +89,7 @@ void initialize_layer(Layer* layer) {
                 weights_p[index] = scale * rand_uniform(-1.0, 1.0);
             }
 
-            layer->grads.conv_grads = calloc_4d_float_array(num_filters, input_channels, filter_size, filter_size);
+            layer->grads.conv_grads = calloc_4d_float_array(num_filters, filter_size, filter_size, input_channels);
             if (layer->grads.conv_grads == NULL) {
                 fprintf(stderr, "Error: Failed to allocate memory for convolutional weight gradients\n");
                 free_4d_float_array(layer->weights.conv_weights);
